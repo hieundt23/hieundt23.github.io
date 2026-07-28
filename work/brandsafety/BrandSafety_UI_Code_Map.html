@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brand Safety — UI ↔ Code Map</title>
+<style>
+  :root{--bg:#0f1420;--panel:#171d2b;--panel2:#1e2740;--ink:#e7ecf5;--muted:#9aa7bd;--line:#2c374f;
+    --media:#4ea1ff;--news:#37c98b;--warn:#ffb454;--chip:#232d45;--code:#d7e2ff}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.55;font-size:15px}
+  .wrap{max-width:1080px;margin:0 auto;padding:30px 22px 80px}
+  h1{font-size:25px;margin:0 0 4px}
+  .sub{color:var(--muted);margin-bottom:14px}
+  a{color:var(--media);text-decoration:none}
+  code{background:var(--chip);padding:1px 6px;border-radius:5px;font-size:12.5px;color:var(--code)}
+  .screen{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:18px 0}
+  .screen.media{border-top:3px solid var(--media)}
+  .screen.news{border-top:3px solid var(--news)}
+  .screen h2{font-size:19px;margin:0 0 2px;display:flex;align-items:center;gap:10px}
+  .badge{font-size:11px;font-weight:700;border-radius:6px;padding:2px 9px}
+  .badge.media{background:rgba(78,161,255,.16);color:var(--media);border:1px solid var(--media)}
+  .badge.news{background:rgba(55,201,139,.16);color:var(--news);border:1px solid var(--news)}
+  .url{color:var(--muted);font-size:12.5px;margin:2px 0 14px}
+  h3{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:16px 0 8px}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:4px 0}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:#cdd8ee;font-weight:600}
+  tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+  .flow{font-size:13px;color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:10px 14px;margin:6px 0}
+  .flow b{color:var(--media)}
+  .note{background:linear-gradient(180deg,rgba(255,180,84,.08),rgba(255,180,84,.02));border:1px solid rgba(255,180,84,.3);border-left:3px solid var(--warn);border-radius:9px;padding:10px 14px;margin:10px 0;font-size:13.5px}
+  .toc{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 18px;margin-bottom:8px;font-size:14px}
+  .toc a{display:inline-block;margin:3px 12px 3px 0}
+  .foot{margin-top:36px;color:var(--muted);font-size:12px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Brand Safety — UI ↔ Code Map</h1>
+  <div class="sub">Bản đồ từ màn hình thực tế trên tool → code xử lý (endpoint · service · repo · bảng DB · job nền). Cập nhật dần theo từng màn hình.</div>
+
+  <div class="note"><b>Cập nhật repo:</b> ngoài 4 repo core, có thêm <b>media-report</b> — bộ xử lý report/estimate/monitor cho pipeline MEDIA (jobs: EstimatePageView, ReportYoutubeMlAccuracy, ReportMediaSla, ReportCollectionYt, Monitor*…), ghi vào các bảng <code>brandsafety_report_*</code>. Đây là nguồn số cho màn Ước lượng (#4).</div>
+
+  <div class="toc"><b>Mục lục:</b>
+    <a href="#s1">1. Audience — Quản lý Audience</a>
+    <a href="#s2">2. Create / Edit Audience (modal)</a>
+    <a href="#s3">3. Thống kê từ khóa (Keyword statistics)</a>
+    <a href="#s4">4. Ước lượng (Estimate Audience)</a>
+    <a href="#s5">5. Tracking Scripts (= Connector)</a>
+    <a href="#s6">6. Báo cáo (Report Tracking)</a>
+    <a href="#s7">7. Cài đặt cảnh báo (Alarm Setting)</a>
+    <a href="#s8">8. Check media (Debug Media)</a>
+    <a href="#s9">9. Kiểm tra chi tiết url (Debug URL)</a>
+  </div>
+
+  <!-- ===================== SCREEN 1 ===================== -->
+  <div class="screen media" id="s1">
+    <h2>1. Audience — Quản lý Audience <span class="badge media">MEDIA</span></h2>
+    <div class="url">safety.admicro.vn · Trang chủ / Audience · (media-service — Spring Boot)</div>
+
+    <p><b>Chức năng:</b> xem danh sách &amp; CRUD các tập Audience (tiêu chí keyword/topic/domain/country/language để đánh giá safe–unsafe). Màn này là <b>CRUD metadata thuần</b> — không xử lý nặng ở đây.</p>
+
+    <h3>Các thành phần trên màn → API</h3>
+    <table>
+      <tr><th>Thành phần UI</th><th>Endpoint</th><th>Controller → Service</th><th>Ghi chú</th></tr>
+      <tr><td>Bảng danh sách audience</td><td><code>GET /api/v1/audience</code><br>?page&amp;size&amp;titleContains</td><td>AudienceController.getAudience() → AudienceService.getListAudience()</td><td>Cột hiển thị: <code>#</code>=audience_id, name=title, Keywords=cột keywords, Website=cột domains</td></tr>
+      <tr><td>Ô Search ("keyword…")</td><td><code>GET /api/v1/audience</code> (param <code>titleContains</code>)</td><td>getListAudienceContains()</td><td>⚠ Lọc theo <b>TÊN audience</b>, không phải theo nội dung keyword — dù placeholder ghi "keyword".</td></tr>
+      <tr><td>Nút "Tạo Audience +"</td><td><code>POST /api/v1/audience</code> (header userId)</td><td>createAudience()</td><td>Insert title, keywords, domains, countries, languages, type</td></tr>
+      <tr><td>Nút "Thống kê từ khóa"</td><td><code>GET /api/v1/keyword/overview · /metric(s) · /new · /suggest</code></td><td>KeywordController → KeywordService</td><td>Xem mục 3</td></tr>
+      <tr><td>Sửa / Xóa (trong chi tiết)</td><td><code>PUT /DELETE /api/v1/audience/{id}</code></td><td>updateAudience() / deleteAudience()</td><td>Sửa audience → collection dùng nó bị đánh dấu chạy lại</td></tr>
+      <tr><td>Share / Unshare audience</td><td><code>POST|PUT /api/v1/audience/share · /unshare</code></td><td>shareAudience() / removeShareAudience()</td><td>Chia sẻ tập cho user khác; <code>GET /audience/user</code> = danh sách user được share</td></tr>
+    </table>
+
+    <h3>Luồng dữ liệu</h3>
+    <div class="flow">UI → <b>media-service</b> (AudienceController → AudienceService → AudienceRepository / Spring Data JPA) → MySQL bảng <b>brandsafety_service_audience</b></div>
+
+    <h3>Bảng DB</h3>
+    <table>
+      <tr><th>Bảng</th><th>Trường chính</th></tr>
+      <tr><td><code>brandsafety_service_audience</code></td><td>audience_id, title, keywords (TEXT), domains (TEXT), countries, languages, <b>type</b> (0=Tracking/news, 1=Social Media), created_user_id, created_at, last_modified…</td></tr>
+    </table>
+
+    <div class="note">
+      <b>Lưu ý / điểm cần hỏi:</b><br>
+      • Ô Search lọc theo <b>title</b> (titleContains) chứ không theo keyword — xác nhận đây là đúng ý thiết kế hay là bug UX.<br>
+      • Cột <code>keywords</code>/<code>domains</code> là kiểu TEXT → kiểm tra format lưu (chuỗi phân tách bằng dấu phẩy hay JSON).<br>
+      • Trường <code>type</code> dùng chung bảng cho cả news &amp; media — audience tạo ở tool này thường <code>type=1</code>.<br>
+      • Xử lý match kênh thực tế <b>không ở màn này</b> — nằm ở media-processing (<code>ReprocessCollection</code>) khi audience được tạo/sửa.
+    </div>
+  </div>
+
+  <!-- ===================== SCREEN 2 ===================== -->
+  <div class="screen media" id="s2">
+    <h2>2. Create / Edit Audience (modal) <span class="badge media">MEDIA</span></h2>
+    <div class="url">safety.admicro.vn · modal "Create" khi bấm "Tạo Audience +" · (media-service)</div>
+
+    <p><b>Chức năng:</b> tạo mới (hoặc sửa) một tập Audience. Toàn form submit qua <code>POST /api/v1/audience</code> → <code>AudienceService.createAudience()</code>. Sửa dùng <code>PUT /api/v1/audience/{id}</code>.</p>
+
+    <h3>Map từng field → request (AudienceRequest) → DB</h3>
+    <table>
+      <tr><th>Field trên form</th><th>Trường request</th><th>Cột DB</th><th>Ý nghĩa / xử lý</th></tr>
+      <tr><td>Audience name *</td><td><code>title</code></td><td>title</td><td>Bắt buộc. Check trùng tên theo user → lỗi "Title has exists"</td></tr>
+      <tr><td>Keywords</td><td><code>keywords</code></td><td>keywords (TEXT)</td><td>Không null. Số keyword = số dấu phẩy + 1. Cho phép dán loạt kw ngăn bằng dấu phẩy</td></tr>
+      <tr><td>Min match</td><td><code>kwsMinMatch</code></td><td>(cột min-match)</td><td><b>Số keyword tối thiểu phải khớp</b> mới coi là vi phạm. Phải ≤ tổng kw (else lỗi). 1 kw (không dấu phẩy) → tự set 0</td></tr>
+      <tr><td>Keyword suggestions by topic (chips)</td><td><code>topics</code></td><td>topics</td><td>Topic tiếng Việt → convert sang tiếng Anh qua <code>Config.viToEngTopic</code>. Chip gợi ý kw theo chủ đề (KeywordController /suggest-audience)</td></tr>
+      <tr><td>Type: Tracking</td><td><code>type</code></td><td>type</td><td>0 = Tracking (news), 1 = Social Media</td></tr>
+      <tr><td>Advanced settings</td><td><code>domains, countries, languages, status, description</code></td><td>tương ứng</td><td>Mở rộng tiêu chí: chặn theo domain / quốc gia / ngôn ngữ</td></tr>
+    </table>
+
+    <h3>Validation &amp; side-effect (trong createAudience)</h3>
+    <div class="flow">
+      1) Trùng <b>title</b> (cùng user, chưa xóa) → chặn · 2) <b>keywords</b> null → chặn ·
+      3) <b>kwsMinMatch</b> &gt; số keyword → chặn · 4) Sinh <b>audience_token</b> = hash(title:userId:timestamp) → gắn vào JS tracking · 5) Lưu vào <b>brandsafety_service_audience</b>
+    </div>
+
+    <div class="note">
+      <b>Lưu ý / điểm cần hỏi:</b><br>
+      • <b>[Đã giải đáp] 3 ô đếm xanh/cam/đỏ</b> cạnh "Keywords": là <b>phân loại type của keyword</b> qua <code>POST /api/v1/check-kw-type</code> → 1 = stopword (từ dừng), 2 = cụm từ nhiều chữ, 3 = từ đơn. 3 ô đếm số keyword theo 3 loại này (có backend hỗ trợ, không chỉ FE).<br>
+      • "Min match" là khái niệm cốt lõi: quyết định phải khớp bao nhiêu kw mới flag — giải thích các audience tên "test min match keywords" trong danh sách.<br>
+      • Tạo/sửa audience → collection dùng nó bị đánh dấu chạy lại ở media-processing (ReprocessCollection).
+    </div>
+  </div>
+
+  <!-- ===================== SCREEN 3 (Keyword statistics) ===================== -->
+  <div class="screen media" id="s3">
+    <h2>3. Thống kê từ khóa — Keyword statistics <span class="badge media">MEDIA</span></h2>
+    <div class="url">safety.admicro.vn · modal khi bấm "Thống kê từ khóa" · (media-service — KeywordController)</div>
+
+    <p><b>Chức năng:</b> đo "độ đắt" của 1 keyword — nếu dùng để chặn thì loại trừ bao nhiêu URL &amp; mất bao nhiêu pageview. Công cụ cân nhắc trade-off reach khi tư vấn khách.</p>
+
+    <h3>Các thẻ / biểu đồ → API</h3>
+    <table>
+      <tr><th>Thành phần UI</th><th>Endpoint</th><th>Nguồn dữ liệu</th></tr>
+      <tr><td>Nút "Check" 1 keyword</td><td><code>GET /api/v1/keyword/metric?keyword=</code></td><td>KeywordService.getMetricByKeyword() → KeywordRepository.findByKeyword() → <b>KeywordEntity</b> (MySQL)</td></tr>
+      <tr><td>Thẻ "audience đang chạy" (30)</td><td>↑ cùng entity</td><td>số tập audience dùng keyword (count_audience)</td></tr>
+      <tr><td>Thẻ "url không an toàn" (151,104)</td><td>↑</td><td><code>KeywordEntity.frequency</code></td></tr>
+      <tr><td>Thẻ "pageview loại trừ PC / Mb"</td><td>↑</td><td><code>totalPageview</code> / <code>totalPageviewMb</code></td></tr>
+      <tr><td>3 pie "Tỷ trọng url / pv PC / pv MB"</td><td><code>GET /api/v1/keyword/overview</code></td><td>getOverview() = tổng URL + tổng pageview toàn hệ thống (mẫu số)</td></tr>
+      <tr><td>(nhiều keyword)</td><td><code>GET /api/v1/keyword/metrics?keywords=</code></td><td>getMetricByKeywords()</td></tr>
+    </table>
+
+    <h3>Luồng dữ liệu &amp; ai ghi bảng brandsafety_service_keyword</h3>
+    <div class="flow">
+      <b>Đọc:</b> media-service (KeywordController → KeywordService → KeywordRepository) đọc <b>KeywordEntity</b> (MySQL, bảng <code>brandsafety_service_keyword</code>).<br>
+      <b>INSERT dòng keyword:</b> (1) media-service <code>KeywordRepository.insertKeyword()</code> — on-demand khi Check kw mới; (2) bs-news-processor <code>job/keyword/LoadKeywordAudience</code> — batch nạp kw từ audience.<br>
+      <b>UPDATE số liệu:</b> bs-news-processor <code>CountKeywordUrlV2</code> (frequency) · <code>CountKeywordAudience</code> (count_audience) · <code>CountKeywordPageViewV2</code> (total_pageview / total_pageview_mb).
+    </div>
+
+    <div class="note">
+      <b>Lưu ý:</b><br>
+      • <b>"Trạng thái: Có thông tin"</b> = keyword đã được tính. Nếu Check keyword <b>chưa có trong bảng</b> → code gọi <code>insertKeyword()</code> để queue cho job tính sau (trạng thái "chưa có thông tin") → mô hình <b>tính nền, không realtime</b>.<br>
+      • Số "loại trừ" (excluded) giúp khách hình dung <b>cái giá về reach</b> khi chặn 1 keyword.<br>
+      • Số liệu keyword do <b>bên NEWS (bs-news-processor)</b> tính → điểm chạm media ↔ news.
+    </div>
+  </div>
+
+  <!-- ===================== SCREEN 4 (Estimate) ===================== -->
+  <div class="screen media" id="s4">
+    <h2>4. Ước lượng — Estimate Audience <span class="badge media">MEDIA</span></h2>
+    <div class="url">safety.admicro.vn · Trang chủ / Ước lượng · (media-service — ReportController)</div>
+
+    <p><b>Chức năng:</b> với 1 tập audience, ước tính có bao nhiêu URL trong hệ thống sẽ bị đánh <b>unsafe</b>, kèm tổng pageview PC/Mobile. Chọn audience ở ô "Lựa chọn Audience" để xem.</p>
+
+    <h3>Các thẻ / bảng → API</h3>
+    <table>
+      <tr><th>Thành phần UI</th><th>Endpoint</th><th>Service → nguồn dữ liệu</th></tr>
+      <tr><td>Thẻ "Tổng số URLs của hệ thống"</td><td><code>GET /api/v1/report/url</code></td><td>ReportService.getReportTotal()</td></tr>
+      <tr><td>Thẻ URLs không an toàn · pageview PC · pageview Mobile + bảng unsafe</td><td><code>GET /api/v1/report/pageview/{id}?type=</code></td><td>getReportPageView() → ReportDao.findReportPageView() → <b>PageViewEntity</b> (MySQL); trả EstimateDto (estimatePageViewPc, estimatePageViewMb, số URL unsafe)</td></tr>
+    </table>
+
+    <h3>Luồng dữ liệu</h3>
+    <div class="flow">UI chọn audience → <b>media-service</b> (ReportController → ReportService → ReportDao) → đọc <b>kết quả estimate đã tính sẵn</b> trong MySQL. Con số do job <b>media-report</b> → <code>job/estimate/EstimatePageView</code> tính trước và ghi vào bảng <b>brandsafety_report_estimate_pageview</b>.</div>
+
+    <div class="note">
+      <b>⭐ Điểm quan trọng nhất (để trả lời khách):</b><br>
+      • Estimate <b>KHÔNG tính realtime</b> — do job nền tính trước rồi tool chỉ đọc. Audience mới tạo phải <b>đợi ~1 tiếng</b> mới có số. Backend trả thẳng message: <i>"audience chưa được estimate, hãy thử lại sau 1 tiếng"</i> → đúng lý do màn đang hiện 0 / "Data not found".<br>
+      • <b>[Đã đính chính]</b> Job tính estimate nằm ở repo <b>media-report</b> (<code>EstimatePageView</code> → bảng <code>brandsafety_report_estimate_pageview</code>), tức là <b>media-side</b> — KHÔNG phải bs-news-processor như phỏng đoán ban đầu.<br>
+      • Tham số <code>type</code> trong endpoint pageview — xác nhận ý nghĩa (loại thiết bị / loại audience).
+    </div>
+  </div>
+
+  <!-- ===================== SCREEN 5 ===================== -->
+  <div class="screen media" id="s5">
+    <h2>5. Tracking Scripts — Quản lý Tracking Scripts <span class="badge media">MEDIA</span></h2>
+    <div class="url">safety.admicro.vn · Trang chủ / Tracking Scripts · (media-service — ConnectorController)</div>
+
+    <div class="note" style="border-left-color:var(--media);border-color:rgba(78,161,255,.35);background:linear-gradient(180deg,rgba(78,161,255,.08),rgba(78,161,255,.02))">
+      <b>⚠ Tên UI ≠ tên code:</b> "Tracking Script" trên tool = <b>Connector</b> trong code. Mọi endpoint nằm dưới <code>/api/v1/connector</code>, không có "tracking" nào trong code. Nhớ chỗ này để khỏi lạc khi đọc code.
+    </div>
+
+    <p><b>Chức năng:</b> quản lý các đoạn script/tích hợp nhúng lên site khách (JS tracking, wrapper banner, video tracking…), mỗi cái gắn với 1 audience để kiểm tra nội dung trước khi cho quảng cáo lên.</p>
+
+    <h3>Bảng + bộ lọc → API</h3>
+    <table>
+      <tr><th>UI</th><th>Endpoint / param</th><th>Xử lý</th></tr>
+      <tr><td>Bảng danh sách + Search</td><td><code>GET /api/v1/connector</code> (params: titleContains, audienceId, type, page, size)</td><td>ConnectorController.getConnector() → ConnectorService</td></tr>
+      <tr><td>Ô keyword</td><td><code>titleContains</code></td><td>lọc theo tên</td></tr>
+      <tr><td>Dropdown "Tất cả Audience"</td><td><code>audienceId</code></td><td>lọc theo audience gắn với script</td></tr>
+      <tr><td>Dropdown "Tất cả phân loại"</td><td><code>type</code> = <b>ConnectorType</b></td><td>JS_TRACKING(3), VIDEO_TRACKING(5), GOOGLE_TRACKING(6), WRAPPER_BANNER(2), DSP(4), ADX_BANNER_MB_*…</td></tr>
+      <tr><td>Cột Tên / Audiences / Phân loại / Trạng thái</td><td>—</td><td>title / audience / type / status của connector</td></tr>
+      <tr><td>Nút "Tạo tracking script +"</td><td><code>POST /api/v1/connector?type=</code></td><td>createConnector(ConnectorRequest)</td></tr>
+      <tr><td>Sửa / Xóa</td><td><code>PUT /DELETE /api/v1/connector/{id}</code></td><td>updateConnector() / deleteConnector()</td></tr>
+      <tr><td>Tạo lại key nhúng</td><td><code>GET /api/v1/connector/genkey/{id}</code></td><td>generateNewKey() — sinh lại key embed của script</td></tr>
+      <tr><td>Báo cáo an toàn theo connector</td><td><code>GET /api/v1/report/connector/{id}</code></td><td>ReportService.getReportConnector()</td></tr>
+    </table>
+
+    <div class="note">
+      <b>Lưu ý:</b><br>
+      • Đây là <b>cơ chế "giao hàng"</b> của brand safety: audience = tiêu chí, connector/tracking script = đoạn JS/wrapper nhúng thật lên site khách.<br>
+      • ConnectorType rộng hơn "tracking" — gồm cả các điểm nhúng banner ADX. Màn này lọc ra loại tracking.<br>
+      • "Data not found" vì tài khoản chưa tạo tracking script nào.
+    </div>
+  </div>
+
+  <!-- ===================== SCREEN 6 ===================== -->
+  <div class="screen media" id="s6">
+    <h2>6. Báo cáo — Report Tracking <span class="badge media">MEDIA</span></h2>
+    <div class="url">safety.admicro.vn · Trang chủ / Báo cáo · (media-service — ReportController)</div>
+
+    <p><b>Chức năng:</b> xem số lần quảng cáo đã hiển thị <b>an toàn / không an toàn / lỗi</b> theo thời gian cho từng tracking script (connector), tách theo domain.</p>
+
+    <h3>Thành phần → API</h3>
+    <table>
+      <tr><th>UI</th><th>Endpoint / param</th><th>Xử lý</th></tr>
+      <tr><td>Chọn tracking script + khoảng ngày → biểu đồ + bảng domain</td><td><code>GET /api/v1/report/connector/{id}?timeStart&amp;timeEnd&amp;domain</code></td><td>getReportConnector() → ReportDao.getListReport() → SQL <b>brandsafety_report_connector</b> (join brandsafety_service_connector)</td></tr>
+      <tr><td>Nút xuất Excel</td><td><code>GET /api/v1/report/excel/{id}?timeStart&amp;timeEnd</code></td><td>getReportConnectorExcel()</td></tr>
+    </table>
+
+    <h3>Map cột → DB</h3>
+    <table>
+      <tr><th>UI</th><th>Cột brandsafety_report_connector</th></tr>
+      <tr><td>Hiển thị an toàn (xanh)</td><td><code>number_safe</code></td></tr>
+      <tr><td>Hiển thị không an toàn (cam)</td><td><code>number_unsafe</code></td></tr>
+      <tr><td>Hiển thị lỗi (đỏ)</td><td>error / number_error</td></tr>
+      <tr><td>Tổng số lần hiển thị</td><td>tổng</td></tr>
+      <tr><td>Bảng tách theo Domain</td><td>kết hợp <code>brandsafety_report_domain</code></td></tr>
+    </table>
+
+    <h3>Luồng dữ liệu</h3>
+    <div class="flow">UI → <b>media-service</b> (ReportController → ReportService → ReportDao) → đọc MySQL <b>brandsafety_report_connector</b>. Số liệu do <b>media-report</b> (<code>job/report/ReportConnectionAudit</code>, <code>ReportConnectionWrapper</code>) tổng hợp <b>hằng ngày</b> và INSERT vào bảng này.</div>
+
+    <div class="note">
+      <b>Lưu ý:</b><br>
+      • Lại là mô hình <b>tính nền, không realtime</b> — "Data not found" khi chưa chọn script / chưa có dữ liệu trong khoảng ngày.<br>
+      • Biểu đồ = chuỗi thời gian theo ngày; bảng = breakdown theo domain (safe/unsafe/lỗi + %).<br>
+      • Nối tiếp màn #5: connector = tracking script, màn này là báo cáo hiệu quả an toàn của chính connector đó.
+    </div>
+  </div>
+
+  <!-- ===================== SCREEN 7 ===================== -->
+  <div class="screen media" id="s7">
+    <h2>7. Cài đặt cảnh báo — Alarm Setting <span class="badge media">MEDIA</span></h2>
+    <div class="url">safety.admicro.vn · Trang chủ / Cài đặt cảnh báo · (media-service — AlarmController)</div>
+
+    <p><b>Chức năng:</b> cấu hình cảnh báo (email / SĐT) theo chu kỳ cho từng tracking script (connector) — khi có nội dung unsafe thì gửi alert.</p>
+
+    <div class="note" style="border-left-color:var(--media);border-color:rgba(78,161,255,.35);background:linear-gradient(180deg,rgba(78,161,255,.08),rgba(78,161,255,.02))">
+      <b>⚠ Kiến trúc đáng nhớ:</b> cảnh báo <b>không có bảng riêng</b> — lưu ngay trên bản ghi <b>connector</b> (<code>brandsafety_service_connector</code>) qua các cột <code>statusAlarm, email, phoneNumber, period, alarmName</code>. Hệ quả: <b>mỗi tracking script chỉ gắn tối đa 1 cảnh báo</b>.
+    </div>
+
+    <h3>Bảng + hành động → API</h3>
+    <table>
+      <tr><th>UI</th><th>Endpoint</th><th>Xử lý</th></tr>
+      <tr><td>Bảng danh sách + Search</td><td><code>GET /api/v1/alarm?titleContains&amp;page&amp;size</code></td><td>getListAlarm() → connector có statusAlarm ≠ 0</td></tr>
+      <tr><td>Tạo cảnh báo +</td><td><code>POST /api/v1/alarm</code></td><td>createAlarm(AlarmRequest{connectorId, alarmName, email, phoneNumber, period}). Dropdown script lấy từ <code>GET /api/v1/connector/alarm</code> (connector chưa có alarm)</td></tr>
+      <tr><td>Sửa / Xóa</td><td><code>PUT /DELETE /api/v1/alarm/{connectorId}</code></td><td>updateAlarm() / deleteAlarm() (set statusAlarm=0)</td></tr>
+      <tr><td>Lịch sử cảnh báo + Excel</td><td><code>GET /api/v1/history/alarm</code> · <code>/history/excel/alarm/{id}</code></td><td>getAlarmHistory() → AlarmHistoryEntity</td></tr>
+    </table>
+
+    <h3>Map cột → field connector</h3>
+    <table>
+      <tr><th>Cột UI</th><th>Field ConnectorEntity</th></tr>
+      <tr><td>Tên cảnh báo</td><td><code>alarmName</code></td></tr>
+      <tr><td>Tên tracking</td><td>title (tên connector)</td></tr>
+      <tr><td>Số điện thoại / Email</td><td><code>phoneNumber</code> / <code>email</code></td></tr>
+      <tr><td>Chu kỳ</td><td><code>period</code></td></tr>
+      <tr><td>Trạng thái</td><td><code>statusAlarm</code></td></tr>
+    </table>
+
+    <div class="note">
+      <b>Lưu ý / để support:</b><br>
+      • <b>1 script = tối đa 1 cảnh báo:</b> connector đã có alarm → lỗi "has existed alarm"; tên cảnh báo phải duy nhất → "Title has existed".<br>
+      • Màn này chỉ <b>cấu hình</b>. Việc gửi email/SMS do job nền <code>SendAlarm</code> + <code>EmailSender</code> (media-service · job/report) chạy theo lịch, đọc alarm trên connector + report rồi gửi theo <b>chu kỳ (period)</b>.<br>
+      • "Data not found" vì tài khoản chưa có tracking script nào để gắn cảnh báo (liên quan màn #5).
+    </div>
+  </div>
+
+  <!-- ===================== SCREEN 8 ===================== -->
+  <div class="screen media" id="s8">
+    <h2>8. Check media — Debug/Check Media <span class="badge media">MEDIA</span></h2>
+    <div class="url">safety.admicro.vn · Trang chủ / Cài đặt Check media · (media-service — MediaController) · nguồn: doc/CheckMedia.md</div>
+
+    <p><b>Chức năng:</b> kiểm tra 1 ảnh/video (hoặc URL page) có vi phạm brand safety không, theo bộ tiêu chí Cơ bản / Nâng cao / Tùy chỉnh.</p>
+
+    <div class="note" style="border-left-color:var(--danger);border-color:rgba(255,107,125,.35);background:linear-gradient(180deg,rgba(255,107,125,.08),rgba(255,107,125,.02))">
+      <b>⚠ CỰC KỲ QUAN TRỌNG (support):</b> phần <b>"Url page"</b> (check webpage / landing / facebook page) — theo doc/CheckMedia.md, <b>các luồng xử lý này KHÔNG CÒN CHẠY</b> (từ khi chuyển ML từ đọc-DB sang gọi API). Chỉ luồng <b>upload media file</b> còn hoạt động. Khách báo "check URL page không ra" → là luồng legacy đã ngừng, không phải bug mới.
+    </div>
+
+    <h3>2 điểm bản chất</h3>
+    <div class="flow">
+      • Safe/Unsafe quyết định theo <b>TOPIC</b>. <b>Keyword vi phạm chỉ hiện WARNING</b> (cột "Cảnh báo") — KHÔNG đánh unsafe.<br>
+      • 3 mức Phân loại: <b>Cơ bản</b> = 2 topic (Chính trị + Nội dung bất hợp pháp) + keyword default admicro · <b>Nâng cao</b> = tất cả topic + keyword default · <b>Tùy chỉnh</b> = user tự chọn topic + keyword.
+    </div>
+
+    <h3>Thành phần → API</h3>
+    <table>
+      <tr><th>UI</th><th>Endpoint</th><th>Xử lý</th></tr>
+      <tr><td>Bảng list + filter phân loại/keyword</td><td><code>GET /api/v1/media</code> (titleContains, type)</td><td>MediaController.getMedia()</td></tr>
+      <tr><td>Nút "Chọn tệp" (upload media)</td><td><code>POST /api/v1/upload</code> (MultipartFile)</td><td>UploadController → đẩy lên <b>CDN</b> (≤20MB, html/js/ảnh/video/pdf)</td></tr>
+      <tr><td>Nút Save (Tạo check media)</td><td><code>POST /api/v1/media</code></td><td>uploadMedia(MediaRequest{tên, phân loại, urlPage, media})</td></tr>
+      <tr><td>Phản hồi kết quả</td><td><code>POST /api/v1/media/feedback/{id}</code></td><td>feedbackMedia()</td></tr>
+    </table>
+
+    <h3>Trạng thái &amp; luồng xử lý (media file)</h3>
+    <div class="flow">
+      Cột Trạng thái = <b>MediaEnum</b>: PROCESSING(0) → SAFE(1) / UNSAFE(2).<br>
+      Luồng: upload lên CDN → tạo check media → job <b>HandleCheckVideo</b> (media-processing, qua Airflow) gửi media sang <b>ML API</b> → ghi kết quả vào DB → service matching với tiêu chí → trả kết quả. <b>Async</b> (nên có PROCESSING).
+    </div>
+
+    <div class="note">
+      <b>Lưu ý:</b><br>
+      • Đây là "Debug Media" trong phân quyền (RoleUser) — check on-demand, khác với check kênh YouTube/Facebook.<br>
+      • Media hỗ trợ trên tool: ảnh, video, pdf (API còn nhận docx/txt).
+    </div>
+  </div>
+
+  <!-- ===================== SCREEN 9 ===================== -->
+  <div class="screen media" id="s9">
+    <h2>9. Kiểm tra chi tiết url — Debug URL <span class="badge media">MEDIA</span> <span class="badge news">→ NEWS API</span></h2>
+    <div class="url">safety.admicro.vn · Trang chủ / Kiểm tra chi tiết url · (media-service — InfoController)</div>
+
+    <p><b>Chức năng:</b> nhập 1 URL unsafe → xem chi tiết vì sao nó bị đánh unsafe (audience/keyword/topic nào chặn). Là "Debug URL" trong phân quyền.</p>
+
+    <h3>Thành phần → API</h3>
+    <table>
+      <tr><th>UI</th><th>Endpoint</th><th>Xử lý</th></tr>
+      <tr><td>Ô nhập URL + nút "Kiểm tra"</td><td><code>GET /api/v1/debug?url=…</code></td><td>InfoController.debugAudience() — <b>PROXY</b> (restTemplate) sang API ngoài, trả nguyên kết quả</td></tr>
+    </table>
+
+    <div class="note">
+      <b>Kiến trúc đáng nhớ:</b><br>
+      • media-service <b>không tự tính</b> — chỉ proxy sang <b>API brandsafe phía NEWS</b>: <code>https://bs-api.admicro.vn/public/debug</code> (hard-code trong InfoController). URL này debug xem 1 URL unsafe vì audience/keyword/topic nào.<br>
+      • Không đụng DB media. Endpoint bị <b>hard-code</b> trong code (đúng pattern hard-code config toàn hệ thống → nên hỏi chỗ quản lý config chuẩn).<br>
+      • Liên quan: <code>POST /api/v1/check-kw-type</code> (cùng InfoController) phân loại keyword type 1/2/3 = nguồn của 3 ô đếm màu ở màn #2.
+    </div>
+  </div>
+
+  <div class="foot">Tài liệu cập nhật dần theo từng màn hình bạn mở. Map từ code thật của media-service.</div>
+</div>
+</body>
+</html>
