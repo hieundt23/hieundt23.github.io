@@ -52,6 +52,7 @@
     <a href="#s7">7. Cài đặt cảnh báo (Alarm Setting)</a>
     <a href="#s8">8. Check media (Debug Media)</a>
     <a href="#s9">9. Kiểm tra chi tiết url (Debug URL)</a>
+    <a href="#s10">10. Youtube — Manage brand (Check YouTube)</a>
   </div>
 
   <!-- ===================== SCREEN 1 ===================== -->
@@ -343,6 +344,48 @@
       • media-service <b>không tự tính</b> — chỉ proxy sang <b>API brandsafe phía NEWS</b>: <code>https://bs-api.admicro.vn/public/debug</code> (hard-code trong InfoController). URL này debug xem 1 URL unsafe vì audience/keyword/topic nào.<br>
       • Không đụng DB media. Endpoint bị <b>hard-code</b> trong code (đúng pattern hard-code config toàn hệ thống → nên hỏi chỗ quản lý config chuẩn).<br>
       • Liên quan: <code>POST /api/v1/check-kw-type</code> (cùng InfoController) phân loại keyword type 1/2/3 = nguồn của 3 ô đếm màu ở màn #2.
+    </div>
+  </div>
+
+  <!-- ===================== SCREEN 10 ===================== -->
+  <div class="screen media" id="s10">
+    <h2>10. Youtube — Manage brand youtube (Check YouTube) <span class="badge media">MEDIA</span></h2>
+    <div class="url">safety.admicro.vn · Trang chủ / Youtube · (media-service — YoutubeController, file ~80KB) · MÀN GỐC module YouTube</div>
+
+    <div class="note" style="border-left-color:var(--media);border-color:rgba(78,161,255,.35);background:linear-gradient(180deg,rgba(78,161,255,.08),rgba(78,161,255,.02))">
+      <b>⚠ Tên UI ≠ tên code:</b> "Brand" trên UI = <b>Collection</b> trong code (bảng <code>brandsafety_service_youtube_collection</code>). Mọi endpoint dưới <code>/api/v1/collection</code> và <code>/api/v1/yt/…</code>.
+    </div>
+
+    <p><b>Chức năng:</b> quản lý các "brand" (collection) — mỗi collection gom danh sách kênh YouTube cần kiểm tra theo 1 audience. Đây là màn gốc; các màn con (chi tiết kênh, verify, import…) đi ra từ đây.</p>
+
+    <h3>Bảng danh sách → cột</h3>
+    <table>
+      <tr><th>Cột UI</th><th>Nguồn (GET /api/v1/collection)</th></tr>
+      <tr><td>Brand name + #</td><td>collection name + collection_id</td></tr>
+      <tr><td>Audiences</td><td>audience gắn với collection</td></tr>
+      <tr><td>Monitor (Scan/Tracking)</td><td><code>option</code>: 1 = Scan (quét 2 tháng) · 2 = Tracking (từ lúc tạo)</td></tr>
+      <tr><td>Channels Processed</td><td>số kênh đã xử lý / tổng (%)</td></tr>
+      <tr><td>Views Coverage (%)</td><td>độ phủ view của kênh đã xử lý</td></tr>
+      <tr><td>Safe / Unsafe</td><td>số kênh an toàn / không an toàn</td></tr>
+      <tr><td>Last scan / Status</td><td>thời điểm quét gần nhất / trạng thái collection</td></tr>
+    </table>
+
+    <h3>Hành động → API</h3>
+    <table>
+      <tr><th>UI</th><th>Endpoint</th></tr>
+      <tr><td>Bảng list + Search</td><td><code>GET /api/v1/collection</code></td></tr>
+      <tr><td>Create (nhiều thế hệ)</td><td><code>POST /api/v1/collection</code> · <code>/api/v3/collection</code> · <code>/api/v4/collection</code></td></tr>
+      <tr><td>Report / Export</td><td><code>GET /api/v1/collection/report</code> · <code>/api/v1/collection/export</code></td></tr>
+      <tr><td>Sửa / Xóa (menu 3 chấm)</td><td><code>PUT /DELETE /api/v1/collection/{id}</code></td></tr>
+    </table>
+
+    <h3>Nhóm endpoint kênh (cho các màn con sắp tới)</h3>
+    <div class="flow">
+      <code>/api/v1(v2)/yt/collection/channel</code> (list/add) · <code>/yt/collection/channel/import</code> · <code>/yt/channel/detail</code> · <code>/yt/unsafe</code> · <code>/yt/confirm</code> · <code>/yt/channel/verified · /unverified</code> · <code>/yt/channel/label</code> · <code>/yt/channel/gemini</code> · <code>/yt/channel/manual · /yt/url/manual</code> · <code>/yt/re-categorize</code> · <code>/admin/user-channel-quota/{userId}</code>
+    </div>
+
+    <div class="note">
+      <b>Điểm cần hỏi sếp:</b> Create collection có bản v1 / v3 / v4 — <b>bản nào đang live</b>? (test case tham chiếu <code>/api/v3/collection</code>). Khớp với chuyện youtube/v2 refactor đã cảnh báo từ đầu — nên xác nhận rõ luồng nào chạy prod trước khi sửa.
     </div>
   </div>
 
