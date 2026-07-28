@@ -5,28 +5,47 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Brand Safety — Trung Hiếu</title>
 <meta name="description" content="Tài liệu và file liên quan tới dự án Brand Safety.">
-<meta name="theme-color" content="#0b0d12" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#fbfcfd" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#faf7f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14110f" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='88'>🛡️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../style.css">
 </head>
 <body>
+
+  <div class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="../../">T.Hiếu</a>
+      <nav class="menu">
+        <a href="../../#gioi-thieu">Giới thiệu</a>
+        <a href="../" aria-current="page">Dự án</a>
+        <a href="../../#files">Files</a>
+        <a href="../../#lien-he">Liên hệ</a>
+      </nav>
+      <a class="btn" href="mailto:hieundt.nd@gmail.com">Làm việc cùng nhau</a>
+    </div>
+  </div>
+
   <div class="wrap">
-    <header>
-      <div class="avatar">🛡️</div>
+    <section class="hero" style="grid-template-columns:1fr;padding-bottom:44px">
       <div>
+        <p class="eyebrow">Dự án · 2026</p>
         <h1>Brand Safety</h1>
-        <p class="tagline">Tài liệu &amp; file liên quan tới dự án</p>
+        <p class="lead">
+          Tài liệu và file liên quan tới dự án. [Thêm vài dòng mô tả dự án này làm gì,
+          vai trò của bạn trong đó.]
+        </p>
+        <div class="cta">
+          <a class="btn btn-ghost" href="../">← Tất cả dự án</a>
+        </div>
       </div>
-    </header>
+    </section>
+  </div>
 
-    <nav class="nav">
-      <a href="../../">Trang chủ</a>
-      <a href="../">Work</a>
-      <a href="./" aria-current="page">Brand Safety</a>
-    </nav>
-
-    <h2>Tài liệu</h2>
+  <div class="wrap" style="padding-bottom:96px">
+    <p class="eyebrow no-rule">Tài liệu</p>
     <div class="files">
       <!--
         Bỏ file vào ngay thư mục này (work/brandsafety/), rồi copy 1 khối dưới đây
@@ -35,22 +54,13 @@
         · File HTML  → để nguyên, click sẽ mở ra như một trang web.
         · File doc   → thêm thuộc tính download, click sẽ tải về máy.
 
-        <a class="file" href="bao-cao.html">
-          <span class="icon">🌐</span>
-          <span class="meta">
-            <span class="name">Báo cáo Brand Safety</span>
-            <span class="desc">Mô tả ngắn về file này</span>
-          </span>
-          <span class="dl"><span>Mở</span> →</span>
-        </a>
-
         <a class="file" href="ke-hoach.docx" download>
           <span class="icon">📄</span>
           <span class="meta">
             <span class="name">Kế hoạch.docx</span>
             <span class="desc">Mô tả ngắn về file này</span>
           </span>
-          <span class="dl">Tải ↓</span>
+          <span class="dl">↓</span>
         </a>
       -->
       <a class="file" href="BrandSafety_UI_Code_Map.html">
@@ -59,14 +69,21 @@
           <span class="name">UI ↔ Code Map</span>
           <span class="desc">Bản đồ đối chiếu giao diện với code</span>
         </span>
-        <span class="dl"><span>Mở</span> →</span>
+        <span class="dl">↗</span>
       </a>
     </div>
+  </div>
 
+  <div class="wrap">
     <footer>
-      © 2026 Trung Hiếu · Trang tạo bằng HTML tĩnh, host miễn phí trên
-      <a href="https://pages.github.com" target="_blank">GitHub Pages</a>
+      <span>© 2026 Trung Hiếu</span>
+      <span class="footer-links">
+        <a href="mailto:hieundt.nd@gmail.com">Email</a>
+        <a href="https://github.com/hieundt23" target="_blank" rel="noopener">GitHub</a>
+        <a href="../../">Trang chủ</a>
+      </span>
     </footer>
   </div>
+
 </body>
 </html>

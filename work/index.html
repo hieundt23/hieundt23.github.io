@@ -3,50 +3,70 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Work — Trung Hiếu</title>
+<title>Dự án — Trung Hiếu</title>
 <meta name="description" content="Các dự án và công việc Trung Hiếu đã thực hiện.">
-<meta name="theme-color" content="#0b0d12" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#fbfcfd" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#faf7f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14110f" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='88'>👋</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../style.css">
 </head>
 <body>
+
+  <div class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="../">T.Hiếu</a>
+      <nav class="menu">
+        <a href="../#gioi-thieu">Giới thiệu</a>
+        <a href="./" aria-current="page">Dự án</a>
+        <a href="../#files">Files</a>
+        <a href="../#lien-he">Liên hệ</a>
+      </nav>
+      <a class="btn" href="mailto:hieundt.nd@gmail.com">Làm việc cùng nhau</a>
+    </div>
+  </div>
+
   <div class="wrap">
-    <header>
-      <div class="avatar">TH</div>
+    <section class="hero" style="grid-template-columns:1fr;padding-bottom:44px">
       <div>
-        <h1>Work</h1>
-        <p class="tagline">Dự án &amp; công việc mình đã làm</p>
+        <p class="eyebrow">Dự án</p>
+        <h1>Những gì tôi đã làm.</h1>
+        <p class="lead">
+          Nơi tổng hợp các dự án và tài liệu đi kèm. Bấm vào từng mục để xem chi tiết.
+        </p>
       </div>
-    </header>
+    </section>
+  </div>
 
-    <nav class="nav">
-      <a href="../">Trang chủ</a>
-      <a href="./" aria-current="page">Work</a>
-    </nav>
-
-    <p class="bio">
-      Đây là nơi mình tổng hợp các dự án và công việc đã thực hiện. Bấm vào từng
-      mục để xem chi tiết.
-    </p>
-
-    <h2>Dự án</h2>
-    <div class="files">
-      <!-- Mỗi dự án là 1 khối như dưới. Copy/sửa href, tên và mô tả cho phù hợp. -->
-      <a class="file" href="brandsafety/">
-        <span class="icon">🛡️</span>
-        <span class="meta">
-          <span class="name">Brand Safety</span>
-          <span class="desc">Tài liệu &amp; file liên quan tới dự án</span>
+  <div class="wrap" style="padding-bottom:96px">
+    <div class="rows">
+      <!-- Mỗi dự án là 1 khối như dưới. Copy và sửa cho phù hợp. -->
+      <a class="row" href="brandsafety/">
+        <span class="row-year">2026</span>
+        <span>
+          <span class="row-name">Brand Safety</span>
+          <span class="row-tags">Tài liệu · UI ↔ Code Map</span>
         </span>
-        <span class="dl"><span>Xem</span> →</span>
+        <span class="row-desc">
+          Tập tài liệu và bản đồ đối chiếu giao diện với code của dự án.
+        </span>
+        <span class="row-arrow">↗</span>
       </a>
     </div>
+  </div>
 
+  <div class="wrap">
     <footer>
-      © 2026 Trung Hiếu · Trang tạo bằng HTML tĩnh, host miễn phí trên
-      <a href="https://pages.github.com" target="_blank">GitHub Pages</a>
+      <span>© 2026 Trung Hiếu</span>
+      <span class="footer-links">
+        <a href="mailto:hieundt.nd@gmail.com">Email</a>
+        <a href="https://github.com/hieundt23" target="_blank" rel="noopener">GitHub</a>
+        <a href="../">Trang chủ</a>
+      </span>
     </footer>
   </div>
+
 </body>
 </html>

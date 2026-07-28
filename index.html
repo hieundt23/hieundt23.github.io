@@ -4,74 +4,200 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Trung Hiếu — Trang cá nhân</title>
-<meta name="description" content="Trang cá nhân của Trung Hiếu — giới thiệu bản thân và chia sẻ file.">
-<meta name="theme-color" content="#0b0d12" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#fbfcfd" media="(prefers-color-scheme: light)">
+<meta name="description" content="Trang cá nhân của Trung Hiếu — giới thiệu, dự án và file chia sẻ.">
+<meta name="theme-color" content="#faf7f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14110f" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='88'>👋</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+  <div class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="./">T.Hiếu</a>
+      <nav class="menu">
+        <a href="#gioi-thieu">Giới thiệu</a>
+        <a href="#du-an">Dự án</a>
+        <a href="#files">Files</a>
+        <a href="#lien-he">Liên hệ</a>
+      </nav>
+      <a class="btn" href="mailto:hieundt.nd@gmail.com">Làm việc cùng nhau</a>
+    </div>
+  </div>
+
+  <!-- ============================ HERO ============================ -->
   <div class="wrap">
-    <header>
-      <div class="avatar">TH</div>
+    <section class="hero">
       <div>
-        <h1>Trung Hiếu</h1>
-        <p class="tagline">Trang cá nhân &amp; nơi lưu trữ file của mình</p>
+        <p class="eyebrow">[Thành phố] · Sẵn sàng cho dự án mới</p>
+        <h1>Xây dựng sản phẩm web <em>tinh tế</em>, chỉn chu đến từng chi tiết.</h1>
+        <p class="lead">
+          Tôi là <strong>Trung Hiếu</strong>, [chức danh của bạn] với [số] năm kinh nghiệm
+          biến ý tưởng thành sản phẩm chạy được — từ [lĩnh vực 1] đến [lĩnh vực 2].
+        </p>
+        <div class="cta">
+          <a class="btn" href="#du-an">Xem dự án <span class="arrow">↗</span></a>
+          <a class="btn btn-ghost" href="#files">Files chia sẻ</a>
+        </div>
       </div>
-    </header>
 
-    <nav class="nav">
-      <a href="./" aria-current="page">Trang chủ</a>
-      <a href="work/">Work</a>
-    </nav>
+      <div class="hero-media">
+        <!-- Có ảnh thật thì thay cả thẻ này bằng:
+             <img class="portrait" src="anh-cua-ban.jpg" alt="Trung Hiếu"> -->
+        <div class="portrait">TH</div>
+        <div class="stat">
+          <strong>[X]+</strong>
+          <span>năm kinh nghiệm</span>
+        </div>
+      </div>
+    </section>
+  </div>
 
-    <p class="bio">
-      Xin chào 👋 Đây là trang cá nhân của mình. Mình dùng nó để giới thiệu đôi
-      nét về bản thân và chia sẻ những file linh tinh mà mình muốn lưu lại hoặc
-      gửi cho người khác. Bạn có thể tải về ở mục bên dưới.
-    </p>
+  <!-- ========================= GIỚI THIỆU ========================= -->
+  <section class="section warm" id="gioi-thieu">
+    <div class="wrap about">
+      <div>
+        <p class="eyebrow no-rule">01 · Giới thiệu</p>
+        <h2>Một người làm sản phẩm.</h2>
+      </div>
+      <div class="about-body">
+        <p>
+          [Viết vài dòng về hành trình của bạn — bắt đầu code từ khi nào, điều gì
+          khiến bạn theo nghề, bạn thích làm loại sản phẩm nào, làm việc với ai.]
+        </p>
 
-    <div class="links">
-      <a href="mailto:hieundt.nd@gmail.com">✉️ Email</a>
-      <a href="#" target="_blank">💻 GitHub</a>
-      <a href="#" target="_blank">🔗 Facebook</a>
+        <div class="cols">
+          <div class="col">
+            <h4>Chuyên môn</h4>
+            <ul>
+              <li>[Kỹ năng / công nghệ 1]</li>
+              <li>[Kỹ năng / công nghệ 2]</li>
+              <li>[Kỹ năng / công nghệ 3]</li>
+              <li>[Kỹ năng / công nghệ 4]</li>
+            </ul>
+          </div>
+          <div class="col">
+            <h4>Kinh nghiệm</h4>
+            <ul>
+              <li class="job">
+                <span class="when">[20XX] — nay</span>
+                <span class="what">[Chức danh, nơi làm việc]</span>
+              </li>
+              <li class="job">
+                <span class="when">[20XX] — [20XX]</span>
+                <span class="what">[Chức danh, nơi làm việc]</span>
+              </li>
+              <li class="job">
+                <span class="when">[20XX] — [20XX]</span>
+                <span class="what">[Chức danh, nơi làm việc]</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
+  </section>
 
-    <h2>Files chia sẻ</h2>
-    <div class="files">
-      <!-- Mỗi file là 1 khối như dưới. Copy/sửa href thành tên file bạn up lên. -->
-      <a class="file" href="files/vi-du.pdf" download>
-        <span class="icon">📄</span>
-        <span class="meta">
-          <span class="name">Tài liệu ví dụ.pdf</span>
-          <span class="desc">Mô tả ngắn về file này</span>
-        </span>
-        <span class="dl"><span>Tải</span> ↓</span>
-      </a>
+  <!-- =========================== DỰ ÁN =========================== -->
+  <section class="section" id="du-an">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow no-rule">02 · Dự án chọn lọc</p>
+          <h2>Những gì tôi đã làm.</h2>
+        </div>
+        <a class="link-more" href="work/">Xem tất cả <span>→</span></a>
+      </div>
 
-      <a class="file" href="files/anh.zip" download>
-        <span class="icon">🗂️</span>
-        <span class="meta">
-          <span class="name">Bộ ảnh.zip</span>
-          <span class="desc">Nén nhiều ảnh trong một file</span>
-        </span>
-        <span class="dl"><span>Tải</span> ↓</span>
-      </a>
-
-      <a class="file" href="files/ghi-chu.txt" download>
-        <span class="icon">📝</span>
-        <span class="meta">
-          <span class="name">Ghi chú.txt</span>
-          <span class="desc">File văn bản linh tinh</span>
-        </span>
-        <span class="dl"><span>Tải</span> ↓</span>
-      </a>
+      <div class="rows">
+        <!-- Mỗi dự án là 1 khối như dưới. Copy và sửa cho phù hợp. -->
+        <a class="row" href="work/brandsafety/">
+          <span class="row-year">2026</span>
+          <span>
+            <span class="row-name">Brand Safety</span>
+            <span class="row-tags">Tài liệu · UI ↔ Code Map</span>
+          </span>
+          <span class="row-desc">
+            Tập tài liệu và bản đồ đối chiếu giao diện với code của dự án.
+          </span>
+          <span class="row-arrow">↗</span>
+        </a>
+      </div>
     </div>
+  </section>
 
+  <!-- =========================== FILES =========================== -->
+  <section class="section warm" id="files">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow no-rule">03 · Files chia sẻ</p>
+          <h2>Đồ đạc để sẵn đây.</h2>
+        </div>
+      </div>
+
+      <div class="files">
+        <!-- Mỗi file là 1 khối như dưới. Sửa href thành tên file bạn up lên. -->
+        <a class="file" href="files/vi-du.pdf" download>
+          <span class="icon">📄</span>
+          <span class="meta">
+            <span class="name">Tài liệu ví dụ.pdf</span>
+            <span class="desc">Mô tả ngắn về file này</span>
+          </span>
+          <span class="dl">↓</span>
+        </a>
+
+        <a class="file" href="files/anh.zip" download>
+          <span class="icon">🗂️</span>
+          <span class="meta">
+            <span class="name">Bộ ảnh.zip</span>
+            <span class="desc">Nén nhiều ảnh trong một file</span>
+          </span>
+          <span class="dl">↓</span>
+        </a>
+
+        <a class="file" href="files/ghi-chu.txt" download>
+          <span class="icon">📝</span>
+          <span class="meta">
+            <span class="name">Ghi chú.txt</span>
+            <span class="desc">File văn bản linh tinh</span>
+          </span>
+          <span class="dl">↓</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================== LIÊN HỆ ========================== -->
+  <section class="contact" id="lien-he">
+    <div class="wrap">
+      <p class="eyebrow no-rule" style="justify-content:center">04 · Liên hệ</p>
+      <h2>Có việc gì hay, cứ nhắn tôi.</h2>
+      <p class="lead">
+        Mở email hoặc ghé GitHub của tôi — tôi đọc hết và trả lời sớm nhất có thể.
+      </p>
+      <div class="cta">
+        <a class="btn" href="mailto:hieundt.nd@gmail.com">
+          hieundt.nd@gmail.com <span class="arrow">↗</span>
+        </a>
+        <a class="btn btn-ghost" href="https://github.com/hieundt23" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap">
     <footer>
-      © 2026 Trung Hiếu · Trang tạo bằng HTML tĩnh, host miễn phí trên
-      <a href="https://pages.github.com" target="_blank">GitHub Pages</a>
+      <span>© 2026 Trung Hiếu</span>
+      <span class="footer-links">
+        <a href="mailto:hieundt.nd@gmail.com">Email</a>
+        <a href="https://github.com/hieundt23" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://pages.github.com" target="_blank" rel="noopener">GitHub Pages</a>
+      </span>
     </footer>
   </div>
+
 </body>
 </html>
