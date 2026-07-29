@@ -53,6 +53,7 @@
     <a href="#s8">8. Check media (Debug Media)</a>
     <a href="#s9">9. Kiểm tra chi tiết url (Debug URL)</a>
     <a href="#s10">10. Youtube — Manage brand (Check YouTube)</a>
+    <a href="#s11">11. Create youtube brand (wizard 4 bước)</a>
   </div>
 
   <!-- ===================== SCREEN 1 ===================== -->
@@ -83,7 +84,7 @@
     </table>
 
     <div class="note">
-      <b>Lưu ý / điểm cần hỏi:</b><br>
+      <b>Lưu ý / điểm cần check lại:</b><br>
       • Ô Search lọc theo <b>title</b> (titleContains) chứ không theo keyword — xác nhận đây là đúng ý thiết kế hay là bug UX.<br>
       • Cột <code>keywords</code>/<code>domains</code> là kiểu TEXT → kiểm tra format lưu (chuỗi phân tách bằng dấu phẩy hay JSON).<br>
       • Trường <code>type</code> dùng chung bảng cho cả news &amp; media — audience tạo ở tool này thường <code>type=1</code>.<br>
@@ -116,7 +117,7 @@
     </div>
 
     <div class="note">
-      <b>Lưu ý / điểm cần hỏi:</b><br>
+      <b>Lưu ý / điểm cần check lại:</b><br>
       • <b>[Đã giải đáp] 3 ô đếm xanh/cam/đỏ</b> cạnh "Keywords": là <b>phân loại type của keyword</b> qua <code>POST /api/v1/check-kw-type</code> → 1 = stopword (từ dừng), 2 = cụm từ nhiều chữ, 3 = từ đơn. 3 ô đếm số keyword theo 3 loại này (có backend hỗ trợ, không chỉ FE).<br>
       • "Min match" là khái niệm cốt lõi: quyết định phải khớp bao nhiêu kw mới flag — giải thích các audience tên "test min match keywords" trong danh sách.<br>
       • Tạo/sửa audience → collection dùng nó bị đánh dấu chạy lại ở media-processing (ReprocessCollection).
@@ -342,7 +343,7 @@
     <div class="note">
       <b>Kiến trúc đáng nhớ:</b><br>
       • media-service <b>không tự tính</b> — chỉ proxy sang <b>API brandsafe phía NEWS</b>: <code>https://bs-api.admicro.vn/public/debug</code> (hard-code trong InfoController). URL này debug xem 1 URL unsafe vì audience/keyword/topic nào.<br>
-      • Không đụng DB media. Endpoint bị <b>hard-code</b> trong code (đúng pattern hard-code config toàn hệ thống → nên hỏi chỗ quản lý config chuẩn).<br>
+      • Không đụng DB media. Endpoint bị <b>hard-code</b> trong code (đúng pattern hard-code config toàn hệ thống → cần check lại chỗ quản lý config chuẩn).<br>
       • Liên quan: <code>POST /api/v1/check-kw-type</code> (cùng InfoController) phân loại keyword type 1/2/3 = nguồn của 3 ô đếm màu ở màn #2.
     </div>
   </div>
@@ -385,7 +386,36 @@
     </div>
 
     <div class="note">
-      <b>Điểm cần hỏi sếp:</b> Create collection có bản v1 / v3 / v4 — <b>bản nào đang live</b>? (test case tham chiếu <code>/api/v3/collection</code>). Khớp với chuyện youtube/v2 refactor đã cảnh báo từ đầu — nên xác nhận rõ luồng nào chạy prod trước khi sửa.
+      <b>Điểm cần check lại:</b> Create collection có bản v1 / v3 / v4 — <b>bản nào đang live</b>? (test case tham chiếu <code>/api/v3/collection</code>). Khớp với chuyện youtube/v2 refactor đã cảnh báo từ đầu — cần check lại rõ luồng nào chạy prod trước khi sửa.
+    </div>
+  </div>
+
+  <!-- ===================== SCREEN 11 ===================== -->
+  <div class="screen media" id="s11">
+    <h2>11. Create youtube brand — wizard 4 bước <span class="badge media">MEDIA</span></h2>
+    <div class="url">safety.admicro.vn · Youtube / Create youtube brand · (media-service — YoutubeController) · submit: POST /api/v3/collection</div>
+
+    <p><b>Chức năng:</b> tạo mới 1 brand (collection). 4 bước wizard gom thành <b>1 request</b> <code>YTCollectionRequest</code>, submit ở bước cuối → <code>createYTCollectionV3()</code>.</p>
+
+    <h3>Map 4 bước → field request</h3>
+    <table>
+      <tr><th>Bước</th><th>Field (YTCollectionRequest)</th></tr>
+      <tr><td>1. Enter brand information</td><td><code>name</code> (Brand name*) + <code>option</code> (Monitor: Scan=1 / Tracking=2) + <code>email</code>, <code>phoneNumber</code> (nhận cảnh báo)</td></tr>
+      <tr><td>2. Enter channel information</td><td><code>channelUrls</code> (nhập tay, phân tách) <b>HOẶC</b> <code>urlFile</code> (upload Excel danh sách kênh)</td></tr>
+      <tr><td>3. Select audience</td><td><code>listAudience</code> (1 hoặc nhiều audience)</td></tr>
+      <tr><td>4. Processing statistics</td><td>review/thống kê (số kênh, ước lượng) trước khi tạo</td></tr>
+    </table>
+
+    <h3>Xử lý sau khi submit</h3>
+    <div class="flow">
+      Tạo collection status <b>CREATE</b> → job nền (Safeflow/media-processing) parse kênh từ channelUrls/urlFile → insert <b>youtube_channel</b> + <b>collection_channel_association</b> + bảng core → status <b>REPROCESSING</b> → trigger quick labeling. <b>Async</b> (mới tạo → Channels Processed = 0, chờ job).
+    </div>
+
+    <div class="note">
+      <b>Chi tiết đáng nhớ:</b><br>
+      • <b>Tạo/sửa collection tự bắn Telegram</b> cho team (<code>namhh, cuongnv</code>) qua bot <code>admicro_jOSi7s1_bot</code>, kèm link <code>.../youtube/check/detail/{id}</code>. Người nhận + bot bị hard-code.<br>
+      • <b>Quota kênh:</b> số kênh thêm bị chặn theo gói user (PRO 1000 / MAX 10000 / custom — xem doc "Quota Guideline"). Vượt → block. Admin chỉnh quota: <code>PUT /api/v1/admin/user-channel-quota/{userId}</code>.<br>
+      • Create có v1/v3/v4 — bản đang dùng là v3 (theo test case). Cần check lại bản live.
     </div>
   </div>
 
