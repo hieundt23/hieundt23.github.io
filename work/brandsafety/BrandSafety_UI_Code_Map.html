@@ -21,7 +21,10 @@
   .badge{font-size:11px;font-weight:700;border-radius:6px;padding:2px 9px}
   .badge.media{background:rgba(78,161,255,.16);color:var(--media);border:1px solid var(--media)}
   .badge.news{background:rgba(55,201,139,.16);color:var(--news);border:1px solid var(--news)}
-  .url{color:var(--muted);font-size:12.5px;margin:2px 0 14px}
+  .url{color:var(--muted);font-size:12.5px;margin:2px 0 10px}
+  .src{font-size:11.5px;color:var(--muted);margin:0 0 14px;padding:7px 11px;background:var(--panel2);border:1px dashed var(--line);border-radius:7px}
+  .src b{color:#cdd8ee}
+  .src code{font-size:11px;background:var(--chip)}
   h3{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:16px 0 8px}
   table{width:100%;border-collapse:collapse;font-size:13.5px;margin:4px 0}
   th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
@@ -40,6 +43,8 @@
   <h1>Brand Safety — UI ↔ Code Map</h1>
   <div class="sub">Bản đồ từ màn hình thực tế trên tool → code xử lý (endpoint · service · repo · bảng DB · job nền). Cập nhật dần theo từng màn hình.</div>
 
+  <div class="note" style="border-left-color:#9aa7bd"><b>Về "Nguồn":</b> đường dẫn media-service tính từ <code>src/main/java/com/vcc/bigdata/platform/</code>. Repo khác ghi rõ trong ngoặc <code>[…]</code> (bs-news-processor, media-processing, media-report).</div>
+
   <div class="note"><b>Cập nhật repo:</b> ngoài 4 repo core, có thêm <b>media-report</b> — bộ xử lý report/estimate/monitor cho pipeline MEDIA (jobs: EstimatePageView, ReportYoutubeMlAccuracy, ReportMediaSla, ReportCollectionYt, Monitor*…), ghi vào các bảng <code>brandsafety_report_*</code>. Đây là nguồn số cho màn Ước lượng (#4).</div>
 
   <div class="toc"><b>Mục lục:</b>
@@ -54,12 +59,18 @@
     <a href="#s9">9. Kiểm tra chi tiết url (Debug URL)</a>
     <a href="#s10">10. Youtube — Manage brand (Check YouTube)</a>
     <a href="#s11">11. Create youtube brand (wizard 4 bước)</a>
+    <a href="#s12">12. Detail brand youtube — Overview</a>
+    <a href="#s13">13. Detail brand — Detail all channel</a>
+    <a href="#s14">14. Youtube channel details (modal)</a>
+    <a href="#s15">15. Confirm Youtube Channel (Verify YouTube)</a>
+    <a href="#s16">16. Confirm Youtube URL (Verify URL unsafe)</a>
   </div>
 
   <!-- ===================== SCREEN 1 ===================== -->
   <div class="screen media" id="s1">
     <h2>1. Audience — Quản lý Audience <span class="badge media">MEDIA</span></h2>
     <div class="url">safety.admicro.vn · Trang chủ / Audience · (media-service — Spring Boot)</div>
+    <div class="src"><b>Nguồn:</b> <code>controller/AudienceController.java</code> · <code>service/AudienceService.java</code> · <code>data/entity/AudienceEntity.java</code> (table <code>brandsafety_service_audience</code>) · <code>controller/KeywordController.java</code></div>
 
     <p><b>Chức năng:</b> xem danh sách &amp; CRUD các tập Audience (tiêu chí keyword/topic/domain/country/language để đánh giá safe–unsafe). Màn này là <b>CRUD metadata thuần</b> — không xử lý nặng ở đây.</p>
 
@@ -96,6 +107,7 @@
   <div class="screen media" id="s2">
     <h2>2. Create / Edit Audience (modal) <span class="badge media">MEDIA</span></h2>
     <div class="url">safety.admicro.vn · modal "Create" khi bấm "Tạo Audience +" · (media-service)</div>
+    <div class="src"><b>Nguồn:</b> <code>controller/AudienceController.java</code> (POST /api/v1/audience) · <code>service/AudienceService.java</code> (createAudience) · <code>data/req/AudienceRequest.java</code> · <code>config/Config.java</code> (viToEngTopic) · <code>controller/InfoController.java</code> (check-kw-type)</div>
 
     <p><b>Chức năng:</b> tạo mới (hoặc sửa) một tập Audience. Toàn form submit qua <code>POST /api/v1/audience</code> → <code>AudienceService.createAudience()</code>. Sửa dùng <code>PUT /api/v1/audience/{id}</code>.</p>
 
@@ -128,6 +140,7 @@
   <div class="screen media" id="s3">
     <h2>3. Thống kê từ khóa — Keyword statistics <span class="badge media">MEDIA</span></h2>
     <div class="url">safety.admicro.vn · modal khi bấm "Thống kê từ khóa" · (media-service — KeywordController)</div>
+    <div class="src"><b>Nguồn:</b> <code>controller/KeywordController.java</code> · <code>service/KeywordService.java</code> · <code>repository/connector/KeywordRepository.java</code> · <code>data/entity/KeywordEntity.java</code> · <b>[bs-news-processor]</b> <code>job/keyword/{CountKeywordUrlV2, CountKeywordAudience, CountKeywordPageViewV2, LoadKeywordAudience}.java</code></div>
 
     <p><b>Chức năng:</b> đo "độ đắt" của 1 keyword — nếu dùng để chặn thì loại trừ bao nhiêu URL &amp; mất bao nhiêu pageview. Công cụ cân nhắc trade-off reach khi tư vấn khách.</p>
 
@@ -161,6 +174,7 @@
   <div class="screen media" id="s4">
     <h2>4. Ước lượng — Estimate Audience <span class="badge media">MEDIA</span></h2>
     <div class="url">safety.admicro.vn · Trang chủ / Ước lượng · (media-service — ReportController)</div>
+    <div class="src"><b>Nguồn:</b> <code>controller/ReportController.java</code> · <code>service/ReportService.java</code> (getReportPageView) · <code>repository/connector/ReportDao.java</code> (table <code>brandsafety_report_estimate_pageview</code>) · <b>[media-report]</b> <code>job/estimate/EstimatePageView.java</code></div>
 
     <p><b>Chức năng:</b> với 1 tập audience, ước tính có bao nhiêu URL trong hệ thống sẽ bị đánh <b>unsafe</b>, kèm tổng pageview PC/Mobile. Chọn audience ở ô "Lựa chọn Audience" để xem.</p>
 
@@ -186,6 +200,7 @@
   <div class="screen media" id="s5">
     <h2>5. Tracking Scripts — Quản lý Tracking Scripts <span class="badge media">MEDIA</span></h2>
     <div class="url">safety.admicro.vn · Trang chủ / Tracking Scripts · (media-service — ConnectorController)</div>
+    <div class="src"><b>Nguồn:</b> <code>controller/ConnectorController.java</code> · <code>service/ConnectorService.java</code> · <code>config/ConnectorType.java</code></div>
 
     <div class="note" style="border-left-color:var(--media);border-color:rgba(78,161,255,.35);background:linear-gradient(180deg,rgba(78,161,255,.08),rgba(78,161,255,.02))">
       <b>⚠ Tên UI ≠ tên code:</b> "Tracking Script" trên tool = <b>Connector</b> trong code. Mọi endpoint nằm dưới <code>/api/v1/connector</code>, không có "tracking" nào trong code. Nhớ chỗ này để khỏi lạc khi đọc code.
@@ -219,6 +234,7 @@
   <div class="screen media" id="s6">
     <h2>6. Báo cáo — Report Tracking <span class="badge media">MEDIA</span></h2>
     <div class="url">safety.admicro.vn · Trang chủ / Báo cáo · (media-service — ReportController)</div>
+    <div class="src"><b>Nguồn:</b> <code>controller/ReportController.java</code> (getReportConnector, /report/connector/{id}, /report/excel/{id}) · <code>service/ReportService.java</code> · <code>repository/connector/ReportDao.java</code> (table <code>brandsafety_report_connector</code>) · <b>[media-report]</b> <code>job/report/{ReportConnectionAudit, ReportConnectionWrapper}.java</code></div>
 
     <p><b>Chức năng:</b> xem số lần quảng cáo đã hiển thị <b>an toàn / không an toàn / lỗi</b> theo thời gian cho từng tracking script (connector), tách theo domain.</p>
 
@@ -254,6 +270,7 @@
   <div class="screen media" id="s7">
     <h2>7. Cài đặt cảnh báo — Alarm Setting <span class="badge media">MEDIA</span></h2>
     <div class="url">safety.admicro.vn · Trang chủ / Cài đặt cảnh báo · (media-service — AlarmController)</div>
+    <div class="src"><b>Nguồn:</b> <code>controller/AlarmController.java</code> · <code>service/AlarmService.java</code> · <code>repository/connector/{AlarmDao, AlarmHistoryRepository}.java</code> · (gửi alert) <code>job/report/{SendAlarm, EmailSender}.java</code></div>
 
     <p><b>Chức năng:</b> cấu hình cảnh báo (email / SĐT) theo chu kỳ cho từng tracking script (connector) — khi có nội dung unsafe thì gửi alert.</p>
 
@@ -291,7 +308,8 @@
   <!-- ===================== SCREEN 8 ===================== -->
   <div class="screen media" id="s8">
     <h2>8. Check media — Debug/Check Media <span class="badge media">MEDIA</span></h2>
-    <div class="url">safety.admicro.vn · Trang chủ / Cài đặt Check media · (media-service — MediaController) · nguồn: doc/CheckMedia.md</div>
+    <div class="url">safety.admicro.vn · Trang chủ / Cài đặt Check media · (media-service — MediaController)</div>
+    <div class="src"><b>Nguồn:</b> <code>controller/MediaController.java</code> · <code>service/MediaService.java</code> · <code>controller/UploadController.java</code> · <code>enumerate/MediaEnum.java</code> · <code>doc/CheckMedia.md</code> · <b>[media-processing]</b> <code>job/media/HandleCheckVideo.java</code></div>
 
     <p><b>Chức năng:</b> kiểm tra 1 ảnh/video (hoặc URL page) có vi phạm brand safety không, theo bộ tiêu chí Cơ bản / Nâng cao / Tùy chỉnh.</p>
 
@@ -331,6 +349,7 @@
   <div class="screen media" id="s9">
     <h2>9. Kiểm tra chi tiết url — Debug URL <span class="badge media">MEDIA</span> <span class="badge news">→ NEWS API</span></h2>
     <div class="url">safety.admicro.vn · Trang chủ / Kiểm tra chi tiết url · (media-service — InfoController)</div>
+    <div class="src"><b>Nguồn:</b> <code>controller/InfoController.java</code> (debugAudience → /api/v1/debug; check-kw-type) · <b>API ngoài:</b> <code>https://bs-api.admicro.vn/public/debug</code></div>
 
     <p><b>Chức năng:</b> nhập 1 URL unsafe → xem chi tiết vì sao nó bị đánh unsafe (audience/keyword/topic nào chặn). Là "Debug URL" trong phân quyền.</p>
 
@@ -352,6 +371,7 @@
   <div class="screen media" id="s10">
     <h2>10. Youtube — Manage brand youtube (Check YouTube) <span class="badge media">MEDIA</span></h2>
     <div class="url">safety.admicro.vn · Trang chủ / Youtube · (media-service — YoutubeController, file ~80KB) · MÀN GỐC module YouTube</div>
+    <div class="src"><b>Nguồn:</b> <code>controller/YoutubeController.java</code> (GET /api/v1/collection; /collection/report, /export, PUT/DELETE /collection/{id}) · <code>service/YoutubeService.java</code></div>
 
     <div class="note" style="border-left-color:var(--media);border-color:rgba(78,161,255,.35);background:linear-gradient(180deg,rgba(78,161,255,.08),rgba(78,161,255,.02))">
       <b>⚠ Tên UI ≠ tên code:</b> "Brand" trên UI = <b>Collection</b> trong code (bảng <code>brandsafety_service_youtube_collection</code>). Mọi endpoint dưới <code>/api/v1/collection</code> và <code>/api/v1/yt/…</code>.
@@ -394,6 +414,7 @@
   <div class="screen media" id="s11">
     <h2>11. Create youtube brand — wizard 4 bước <span class="badge media">MEDIA</span></h2>
     <div class="url">safety.admicro.vn · Youtube / Create youtube brand · (media-service — YoutubeController) · submit: POST /api/v3/collection</div>
+    <div class="src"><b>Nguồn:</b> <code>controller/YoutubeController.java</code> (createYTCollectionV3 / V4, POST /api/v3(v4)/collection) · <code>service/YoutubeService.java</code> (createYTCollectionV3) · <code>data/req/YTCollectionRequest.java</code> · <code>alert/TelegramBot.java</code> (notify)</div>
 
     <p><b>Chức năng:</b> tạo mới 1 brand (collection). 4 bước wizard gom thành <b>1 request</b> <code>YTCollectionRequest</code>, submit ở bước cuối → <code>createYTCollectionV3()</code>.</p>
 
@@ -416,6 +437,162 @@
       • <b>Tạo/sửa collection tự bắn Telegram</b> cho team (<code>namhh, cuongnv</code>) qua bot <code>admicro_jOSi7s1_bot</code>, kèm link <code>.../youtube/check/detail/{id}</code>. Người nhận + bot bị hard-code.<br>
       • <b>Quota kênh:</b> số kênh thêm bị chặn theo gói user (PRO 1000 / MAX 10000 / custom — xem doc "Quota Guideline"). Vượt → block. Admin chỉnh quota: <code>PUT /api/v1/admin/user-channel-quota/{userId}</code>.<br>
       • Create có v1/v3/v4 — bản đang dùng là v3 (theo test case). Cần check lại bản live.
+    </div>
+  </div>
+
+  <!-- ===================== SCREEN 12 ===================== -->
+  <div class="screen media" id="s12">
+    <h2>12. Detail brand youtube — Overview <span class="badge media">MEDIA</span></h2>
+    <div class="url">safety.admicro.vn · Youtube / Detail brand youtube · tab Overview · (media-service — YoutubeController)</div>
+    <div class="src"><b>Nguồn:</b> <code>controller/YoutubeController.java</code> (getYTCollection → /collection/report; getRecentChannelList → /yt/collection/channel/recent; countCategory → /yt/collection/category/count) · <code>service/YoutubeService.java</code> (getReportCollection, getRecentChannelList) · <code>enumerate/ChannelEnum.java</code></div>
+
+    <p><b>Chức năng:</b> trang chi tiết 1 brand (collection). Tab <b>Overview</b> hiển thị biểu đồ trạng thái kênh theo thời gian + danh sách kênh xử lý gần đây. (Tab kia: "Detail all channel".)</p>
+
+    <h3>Biểu đồ Overview → API</h3>
+    <table>
+      <tr><th>Biểu đồ</th><th>Nguồn</th></tr>
+      <tr><td>Channel state over time · New published per day · Channel processed per day</td><td><code>GET /api/v1/collection/report?id&amp;timeStart&amp;timeEnd</code> → getYTCollection() → youtubeService.getReportCollection() → ReportCollectionDto (chuỗi thời gian)</td></tr>
+      <tr><td>List of channels processed in last 24h</td><td><code>GET /api/v1/yt/collection/channel/recent?id&amp;status&amp;language&amp;page&amp;size</code> → getRecentChannelList() → channels + totalSafe/totalUnsafe</td></tr>
+      <tr><td>Phân bố category</td><td><code>GET /api/v1/yt/collection/category/count?id&amp;status</code></td></tr>
+    </table>
+
+    <h3>Legend trạng thái kênh (ChannelEnum — 10 trạng thái)</h3>
+    <table>
+      <tr><th>Tag</th><th>Nghĩa</th><th>Nhóm</th></tr>
+      <tr><td>NORMAL(0)</td><td>chưa có nhãn</td><td>—</td></tr>
+      <tr><td><b>WHITE(1)</b></td><td>whitelist</td><td>SAFE</td></tr>
+      <tr><td>ADMICRO(2)</td><td>kênh thuộc ADMICRO</td><td>—</td></tr>
+      <tr><td><b>GREY(3)</b></td><td>không vi phạm ngữ cảnh unsafe</td><td>SAFE</td></tr>
+      <tr><td>REVIEW(4)</td><td>đang đánh giá thêm</td><td>—</td></tr>
+      <tr><td>LIMITED_MONETIZED(5) / NON_MONETIZED(6)</td><td>hạn chế / không bật kiếm tiền</td><td>—</td></tr>
+      <tr><td><b>BLACK(7)</b></td><td>vi phạm ngữ cảnh unsafe</td><td>UNSAFE</td></tr>
+      <tr><td>BAN(8)</td><td>ban không quảng cáo</td><td>—</td></tr>
+      <tr><td><b>ERROR(9)</b></td><td>xử lý lỗi</td><td>Error</td></tr>
+    </table>
+
+    <div class="note">
+      <b>Lưu ý:</b><br>
+      • Chart "Channel state" chỉ gộp hiển thị 5 nhóm (Process / White / Grey / Black / Error) — enum thực tế có 10 trạng thái. <b>Safe = White + Grey · Unsafe = Black.</b><br>
+      • Badge "Following" = collection đang theo dõi (monitor Tracking); chuông = alarm; ô ngày = lọc timeStart/timeEnd.<br>
+      • Giá trị enum không liên tục (WHITE=1, GREY=3, BLACK=7…) → chú ý khi truyền tham số <code>status</code> để lọc.
+    </div>
+  </div>
+
+  <!-- ===================== SCREEN 13 ===================== -->
+  <div class="screen media" id="s13">
+    <h2>13. Detail brand youtube — tab Detail all channel <span class="badge media">MEDIA</span></h2>
+    <div class="url">safety.admicro.vn · Youtube / Detail brand youtube · tab Detail all channel · (media-service — YoutubeController)</div>
+    <div class="src"><b>Nguồn:</b> <code>controller/YoutubeController.java</code> (getYTCollectionChannel → /api/v1(v2)/yt/collection/channel; countCategory; /yt/collection/channel/delete; /channels/bulk-delete; /yt/channel/label; /yt/category) · <code>service/YoutubeService.java</code> · <code>enumerate/ChannelEnum.java</code></div>
+
+    <p><b>Chức năng:</b> danh sách toàn bộ kênh trong 1 brand (collection), lọc theo trạng thái &amp; category, đổi nhãn, xóa, export.</p>
+
+    <h3>Danh sách + bộ lọc → API</h3>
+    <table>
+      <tr><th>UI</th><th>Endpoint / param</th></tr>
+      <tr><td>Bảng danh sách kênh</td><td><code>GET /api/v1/yt/collection/channel?id&amp;page&amp;size&amp;…</code> → getYTCollectionChannel()</td></tr>
+      <tr><td>Tab trạng thái (All/Processing/White/Grey/Black/Error)</td><td>param <code>status</code> (ChannelEnum)</td></tr>
+      <tr><td>Sidebar Category</td><td>param <code>category</code> (categoryId); danh sách category: <code>GET /api/v1/yt/category</code></td></tr>
+      <tr><td>Ô "Enter channel name"</td><td><code>titleContains</code></td></tr>
+      <tr><td>Icon filter (sliders)</td><td><code>minSubscriber/maxSubscriber, minView/maxView, language/languageId, countryId, timeStart/timeEnd, sortOption</code></td></tr>
+      <tr><td>Đếm số theo trạng thái/category</td><td><code>GET /api/v1/yt/collection/category/count?id&amp;status</code></td></tr>
+    </table>
+
+    <h3>Cột bảng &amp; hành động</h3>
+    <table>
+      <tr><th>Cột / nút</th><th>Ý nghĩa / API</th></tr>
+      <tr><td>Channel name</td><td>tên + subscriber + ngày publish + link kênh</td></tr>
+      <tr><td>Language/Country · Category · Violations · Status · Last scan</td><td>thông tin kênh; Violations = "No violations found" hoặc danh sách vi phạm; Status = dropdown đổi nhãn</td></tr>
+      <tr><td>Đổi nhãn (dropdown Status)</td><td><code>POST /api/v1/yt/channel/label</code></td></tr>
+      <tr><td>Xóa kênh (thùng rác / checkbox)</td><td><code>DELETE /api/v1/yt/collection/channel/delete</code> · nhiều: <code>POST /api/v1/yt/collection/channels/bulk-delete</code></td></tr>
+      <tr><td>Export data</td><td><code>GET /api/v1/collection/export</code></td></tr>
+      <tr><td>Bấm tên kênh → chi tiết</td><td><code>GET /api/v1/yt/channel/detail</code> (màn sau)</td></tr>
+    </table>
+
+    <div class="note">
+      <b>Lưu ý:</b> tab trạng thái + số đếm dùng ChannelEnum (xem bảng ở #12: Safe = White+Grey, Unsafe = Black). Category = category YouTube của kênh (Autos &amp; Vehicles, Music…), khác với "topic" vi phạm.
+    </div>
+  </div>
+
+  <!-- ===================== SCREEN 14 ===================== -->
+  <div class="screen media" id="s14">
+    <h2>14. Youtube channel details (modal) <span class="badge media">MEDIA</span></h2>
+    <div class="url">safety.admicro.vn · Detail brand → bấm tên kênh · modal · (media-service — YoutubeController)</div>
+    <div class="src"><b>Nguồn:</b> <code>controller/YoutubeController.java</code> (getDebugYTCollectionChannel → <b>GET /api/v1/collection/debug</b>) · <code>service/YoutubeService.java</code> (getDebugChannelDto) · <code>data/…/YtChannelDto</code></div>
+
+    <div class="note" style="border-left-color:var(--danger);border-color:rgba(255,107,125,.35);background:linear-gradient(180deg,rgba(255,107,125,.08),rgba(255,107,125,.02))">
+      <b>⚠ Naming gotcha:</b> modal này gọi <code>/api/v1/collection/debug</code>, KHÔNG phải <code>/api/v1/yt/channel/detail</code> (endpoint tên "detail" thực ra là <b>danh sách kênh cần xử lý thủ công</b> — getChannelNeedHandleManual). Đừng nhầm khi đọc code.
+    </div>
+
+    <p><b>Chức năng:</b> xem thông tin 1 kênh + <b>tiến độ xử lý ML</b> của kênh đó.</p>
+
+    <h3>Nội dung modal</h3>
+    <table>
+      <tr><th>Phần</th><th>Ý nghĩa</th></tr>
+      <tr><td>Thông tin kênh</td><td>name, subscriber, views, Category, Country, Last Post Time, "info updated to …" (thời điểm crawl info kênh)</td></tr>
+      <tr><td>Data processing status</td><td>tiến độ xử lý ML theo loại nội dung: <b>profile</b> · <b>văn bản/text-OCR</b> (x/y) · <b>hình ảnh</b> (x/y) · <b>video</b> (x/y)</td></tr>
+    </table>
+
+    <div class="note">
+      <b>Điểm hữu ích để support:</b> nếu 1 loại nội dung chưa xong (vd video 0/1) → kênh vẫn ở trạng thái <b>Processing</b>. Modal này cho biết <b>kênh đang kẹt ở bước nào</b>. Các bước xử lý do <b>media-processing</b> chạy: HandleProfile → HandleUrl/ảnh → HandleVideo → ML/Gemini (async, không realtime).
+    </div>
+  </div>
+
+  <!-- ===================== SCREEN 15 ===================== -->
+  <div class="screen media" id="s15">
+    <h2>15. Confirm Youtube Channel profile — Verify YouTube <span class="badge media">MEDIA</span></h2>
+    <div class="url">safety.admicro.vn · Trang chủ / Confirm Youtube Channel · (media-service — YoutubeController) · quyền Verify Admin</div>
+    <div class="src"><b>Nguồn:</b> <code>controller/YoutubeController.java</code> (getListNotVerifiedChannel → GET /api/v1/yt/channel/unverified; verifyTopicChannel → POST /api/v1/yt/channel/verified) · <code>service/YoutubeService.java</code> · <code>data/req/YtChannelRequest.java</code></div>
+
+    <p><b>Chức năng:</b> con người duyệt lại nhãn topic mà ML gán cho ảnh avatar/cover của kênh (human-in-the-loop). Là "Verify YouTube" trong phân quyền.</p>
+
+    <h3>Bảng + hành động → API</h3>
+    <table>
+      <tr><th>UI</th><th>Endpoint / nguồn</th></tr>
+      <tr><td>Bảng kênh chờ duyệt</td><td><code>GET /api/v1/yt/channel/unverified?page&amp;size</code> → getListNotVerifiedChannel()</td></tr>
+      <tr><td>Channel name / URL</td><td>tên + channelId / url kênh</td></tr>
+      <tr><td>Topics</td><td>nhãn <b>topic ảnh do ML gán</b> (Chính trị / Bạo lực / Người lớn / Safe content…) từ avatar &amp; cover</td></tr>
+      <tr><td>Status</td><td>Wait confirm (chưa duyệt)</td></tr>
+      <tr><td>Nút bút chì (confirm / sửa nhãn)</td><td><code>POST /api/v1/yt/channel/verified</code> (YtChannelRequest) → verifyTopicChannel(userId, …)</td></tr>
+    </table>
+
+    <div class="note">
+      <b>Lưu ý:</b><br>
+      • ML đoán topic ảnh (job <code>HandleProfileImage</code> bên media-processing) → người duyệt chốt lại tại màn này.<br>
+      • <b>Có 2 luồng verify khác nhau</b> trong code — đừng nhầm: <b>verify ảnh kênh</b> (màn này) = <code>/yt/channel/unverified</code> + <code>/yt/channel/verified</code>; <b>verify URL unsafe</b> (màn khác) = <code>/yt/unsafe</code> + <code>/yt/confirm</code>.
+    </div>
+  </div>
+
+  <!-- ===================== SCREEN 16 ===================== -->
+  <div class="screen media" id="s16">
+    <h2>16. Confirm Youtube URL — Verify URL unsafe <span class="badge media">MEDIA</span></h2>
+    <div class="url">safety.admicro.vn · Trang chủ / Confirm Youtube URL · (media-service — YoutubeController) · luồng verify #2</div>
+    <div class="src"><b>Nguồn:</b> <code>controller/YoutubeController.java</code> (getYTCollectionChannelUrl → GET /api/v1/yt/unsafe; confirmCollectionChannelUrl → POST /api/v1/yt/confirm; reCategorizeUrl → POST /api/v1/yt/re-categorize) · <code>service/YoutubeService.java</code> (removeTopicByHumanCheck, updateDebugHumanVideo) · <code>data/req/CollectionChannelUrlRequest.java</code></div>
+
+    <p><b>Chức năng:</b> người duyệt xác nhận các URL mà hệ thống đánh <b>unsafe</b> (đồng ý / không đồng ý / gán nhãn khác). Đây là luồng verify thứ 2 (khác với verify ảnh kênh ở #15).</p>
+
+    <h3>Danh sách + 3 cột topic → API</h3>
+    <table>
+      <tr><th>UI</th><th>Nguồn</th></tr>
+      <tr><td>Bảng URL chờ duyệt</td><td><code>GET /api/v1/yt/unsafe?collectionId&amp;titleContains&amp;page&amp;size</code> → getCollectionChannelUrlUnchecked()</td></tr>
+      <tr><td>URL information</td><td>thumbnail + url + time + url_id</td></tr>
+      <tr><td><b>Image Topic</b></td><td>topic ảnh/thumbnail (Bạo lực, Cái chết/Tử vong, Người lớn…)</td></tr>
+      <tr><td><b>Text Topic</b></td><td>topic văn bản (speech / OCR / content)</td></tr>
+      <tr><td><b>Topic in Video</b></td><td>topic video</td></tr>
+    </table>
+
+    <h3>Modal "Unsafe URL details" — nút</h3>
+    <table>
+      <tr><th>Nút</th><th>API / xử lý</th></tr>
+      <tr><td>Agree / Disagree</td><td><code>POST /api/v1/yt/confirm</code> (CollectionChannelUrlRequest{collectionId, channelId, urlId, <b>status</b>}) → removeTopicByHumanCheck(). status = quyết định người duyệt (giữ / gỡ nhãn unsafe)</td></tr>
+      <tr><td>Custom (gán nhãn khác)</td><td><code>POST /api/v1/yt/re-categorize</code> → updateDebugHumanVideo()</td></tr>
+      <tr><td>Cancel</td><td>đóng modal</td></tr>
+    </table>
+
+    <div class="note">
+      <b>Chi tiết ẩn (để support):</b><br>
+      • <b>Khoá 30 phút:</b> sau khi một URL đã được human-check, không được verify lại trong 30 phút (code chặn thẳng).<br>
+      • <b>Disagree ảnh unsafe → mở lại luồng check video:</b> gỡ nhãn unsafe của ảnh sẽ active lại trạng thái URL để tiếp tục check Video (trước đó URL bị dừng do ảnh unsafe).<br>
+      • 3 topic là 3 kết quả ML độc lập (ảnh / text / video) — lưu trong url_debug/url_core (topic_image, topic_text, topic_video; human check ghi topic_human).
     </div>
   </div>
 
