@@ -64,6 +64,10 @@
     <a href="#s14">14. Youtube channel details (modal)</a>
     <a href="#s15">15. Confirm Youtube Channel (Verify YouTube)</a>
     <a href="#s16">16. Confirm Youtube URL (Verify URL unsafe)</a>
+    <a href="#s17">17. Manually confirm URL (Custom — nhãn tay)</a>
+    <a href="#s18">18. Youtube Channel Manual (chỉ định thủ công)</a>
+    <a href="#s19">19. Categorize Youtube URL (gán nhãn URL theo kênh)</a>
+    <a href="#s20">20. Channel Label Management by Admicro</a>
   </div>
 
   <!-- ===================== SCREEN 1 ===================== -->
@@ -584,15 +588,111 @@
     <table>
       <tr><th>Nút</th><th>API / xử lý</th></tr>
       <tr><td>Agree / Disagree</td><td><code>POST /api/v1/yt/confirm</code> (CollectionChannelUrlRequest{collectionId, channelId, urlId, <b>status</b>}) → removeTopicByHumanCheck(). status = quyết định người duyệt (giữ / gỡ nhãn unsafe)</td></tr>
-      <tr><td>Custom (gán nhãn khác)</td><td><code>POST /api/v1/yt/re-categorize</code> → updateDebugHumanVideo()</td></tr>
+      <tr><td>Custom (gán nhãn khác)</td><td>mở modal "Manually confirm Youtube URL" → xem <b>#17</b> (topic + OCR: /yt/url/manual · video-timeline: /yt/re-categorize)</td></tr>
       <tr><td>Cancel</td><td>đóng modal</td></tr>
     </table>
 
     <div class="note">
       <b>Chi tiết ẩn (để support):</b><br>
-      • <b>Khoá 30 phút:</b> sau khi một URL đã được human-check, không được verify lại trong 30 phút (code chặn thẳng).<br>
+      • <b>Cửa sổ sửa 30 phút:</b> sau khi human-check, VẪN sửa lại được <b>trong vòng 30 phút</b>; <b>quá 30 phút</b> mới bị khoá (code <code>return</code>, không cho verify lại). Điều kiện: <code>if humanCheck != 0 &amp;&amp; updatedAt + 30p &lt; now → return</code>.<br>
       • <b>Disagree ảnh unsafe → mở lại luồng check video:</b> gỡ nhãn unsafe của ảnh sẽ active lại trạng thái URL để tiếp tục check Video (trước đó URL bị dừng do ảnh unsafe).<br>
       • 3 topic là 3 kết quả ML độc lập (ảnh / text / video) — lưu trong url_debug/url_core (topic_image, topic_text, topic_video; human check ghi topic_human).
+    </div>
+  </div>
+
+  <!-- ===================== SCREEN 17 ===================== -->
+  <div class="screen media" id="s17">
+    <h2>17. Manually confirm Youtube URL — Custom (gán nhãn tay) <span class="badge media">MEDIA</span></h2>
+    <div class="url">safety.admicro.vn · modal mở từ nút "Custom" ở màn Confirm URL (#16) · (media-service — YoutubeController)</div>
+    <div class="src"><b>Nguồn:</b> <code>controller/YoutubeController.java</code> (handleUrlManual → POST /api/v1/yt/url/manual; reCategorizeUrl → POST /api/v1/yt/re-categorize; getUrlNeedHandleManual → GET /yt/url/manual; getChannelNeedHandleManual → GET /yt/channel/manual) · <code>service/YoutubeService.java</code> (updateManualUrl, updateDebugHumanVideo) · <code>data/req/YtManualUrlRequest.java</code> · <code>data/response/dto/DebugTimeVideo.java</code></div>
+
+    <p><b>Chức năng:</b> người duyệt tự gán nhãn cho URL — chọn topic + nhập OCR keyword. Có <b>2 biến thể</b> dùng chung request <code>YtManualUrlRequest{urlId, ocrText, debug:List&lt;DebugTimeVideo&gt;}</code>.</p>
+
+    <h3>2 biến thể</h3>
+    <table>
+      <tr><th>Biến thể</th><th>Fields</th><th>Endpoint</th></tr>
+      <tr><td><b>URL / ảnh</b> (màn đang thấy)</td><td>Topic list (checkbox 11 chủ đề) + Text keywords → <code>ocrText</code></td><td><code>POST /api/v1/yt/url/manual</code> → updateManualUrl()</td></tr>
+      <tr><td><b>VIDEO</b> (bản khó tìm)</td><td><code>debug: List&lt;DebugTimeVideo&gt;</code> — mỗi item <code>{topic, time:[đoạn t/gian], reason}</code> → gán topic theo mốc thời gian video</td><td><code>POST /api/v1/yt/re-categorize</code> → updateDebugHumanVideo()</td></tr>
+    </table>
+
+    <div class="note">
+      <b>Vì sao không tìm thấy bản video:</b> URL shorts chỉ có ảnh/OCR → modal chỉ hiện Topic list + Text keywords. Bản video-timeline chỉ xuất hiện khi URL <b>có kết quả video</b> ("Topic in Video" có dữ liệu) — cần mở Custom trên một URL là <b>video thật</b> mới thấy phần chọn topic theo mốc thời gian.<br>
+      • Hàng đợi xử lý tay: <code>GET /api/v1/yt/url/manual</code> (URL) · <code>GET /api/v1/yt/channel/manual</code> (kênh).<br>
+      • <code>DebugTimeVideo</code> có convert topic VI ↔ ENG ↔ ML (Config.viToEngTopic / engMlToBsTopic).
+    </div>
+  </div>
+
+  <!-- ===================== SCREEN 18 ===================== -->
+  <div class="screen media" id="s18">
+    <h2>18. Youtube Channel Manual — chỉ định xử lý thủ công <span class="badge media">MEDIA</span></h2>
+    <div class="url">safety.admicro.vn · Trang chủ / Youtube Channel Manual · (media-service — YoutubeController)</div>
+    <div class="src"><b>Nguồn:</b> <code>controller/YoutubeController.java</code> (getChannelNeedHandleManual → GET /api/v1/yt/channel/manual; handleChannelManual → POST /api/v1/yt/channel/manual) · <code>service/YoutubeService.java</code> (updateStateChannel) · <code>data/req/YtManualChannelRequest.java</code></div>
+
+    <p><b>Chức năng:</b> duyệt danh sách kênh và <b>chỉ định 1 kênh cho việc xử lý URL thủ công</b> (thay vì để pipeline tự động).</p>
+
+    <h3>Bảng + hành động → cột / API</h3>
+    <table>
+      <tr><th>Cột / nút</th><th>Nguồn (channel_core)</th></tr>
+      <tr><td>Bảng danh sách + filter</td><td><code>GET /api/v1/yt/channel/manual</code> (filter: subscriber/duration/video/view range, category, country, language, state)</td></tr>
+      <tr><td>State (Normal ▾)</td><td><code>state</code>: ngoài ưu tiên / đánh nhãn máy / đánh nhãn thủ công — đổi → <code>POST /api/v1/yt/channel/manual</code> → updateStateChannel()</td></tr>
+      <tr><td>User</td><td><code>user_designation</code> — ai đã chỉ định kênh</td></tr>
+      <tr><td>Categories · Total video · Total duration · Last Video Scan</td><td>category YouTube · số video · tổng thời lượng · thời điểm scan video gần nhất</td></tr>
+      <tr><td>Time to Live (N/a)</td><td><code>expire_manual_at</code> — hạn xử lý tay; hết hạn → trả kênh về hệ thống tự xử lý. N/a = chưa chỉ định manual</td></tr>
+    </table>
+
+    <div class="note">
+      <b>Cơ chế:</b> chỉ định kênh sang manual → người xử lý tay thay pipeline tự động, cho tới khi <b>TTL (expire_manual_at) hết hạn</b> thì kênh quay lại luồng tự động.<br>
+      <b>Khỏi nhầm:</b> cột "State" ở đây (kênh: ngoài-ưu-tiên / máy / thủ-công) KHÁC <code>StateEnum</code> (PROCESS/SUCCESS/UNSAFE/WAITING = trạng thái xử lý URL).
+    </div>
+  </div>
+
+  <!-- ===================== SCREEN 19 ===================== -->
+  <div class="screen media" id="s19">
+    <h2>19. Categorize Youtube URL — gán nhãn URL theo kênh <span class="badge media">MEDIA</span></h2>
+    <div class="url">safety.admicro.vn · Trang chủ / Categorize Youtube URL · (media-service — YoutubeController)</div>
+    <div class="src"><b>Nguồn:</b> <code>controller/YoutubeController.java</code> (getUrlNeedHandleManual → GET /api/v1/yt/url/manual) · <code>service/YoutubeService.java</code> (getManualUrlList)</div>
+
+    <p><b>Chức năng:</b> nhập channel ID của kênh đã được chỉ định thủ công (#18) → xem danh sách URL của kênh để gán nhãn từng cái.</p>
+
+    <h3>Thành phần → API</h3>
+    <table>
+      <tr><th>UI</th><th>Nguồn</th></tr>
+      <tr><td>Ô "Enter channel ID" + Search</td><td><code>GET /api/v1/yt/url/manual?channelId&amp;page&amp;size</code> → getUrlNeedHandleManual() → getManualUrlList(channelId)</td></tr>
+      <tr><td>URL information / Topic / Status</td><td>url + info · nhãn topic đã gán · trạng thái xử lý tay</td></tr>
+      <tr><td>Gán nhãn từng URL</td><td>mở modal Custom (#17) → <code>POST /api/v1/yt/url/manual</code> (updateManualUrl) hoặc <code>/yt/re-categorize</code> (video)</td></tr>
+    </table>
+
+    <div class="note">
+      <b>Luồng đầy đủ manual labeling:</b> #18 (chỉ định kênh → manual) → <b>#19</b> (nhập channelId, xem URL của kênh) → #17 (modal gán nhãn từng URL).<br>
+      "Data not found" vì chưa nhập channel ID (hoặc kênh không có URL cần xử lý tay). Màn này <b>bắt buộc channelId cụ thể</b>, khác các màn list-all.
+    </div>
+  </div>
+
+  <!-- ===================== SCREEN 20 ===================== -->
+  <div class="screen media" id="s20">
+    <h2>20. Channel Label Management by Admicro <span class="badge media">MEDIA</span></h2>
+    <div class="url">safety.admicro.vn · Trang chủ / Channel Label Management by Admicro · (media-service — YoutubeController) · nguồn: doc/AdmicroYtChannelListManagement.md</div>
+    <div class="src"><b>Nguồn:</b> <code>controller/YoutubeController.java</code> (POST /api/v1/yt/channel/label; POST /api/v1/yt/channel/import) · <code>service/YoutubeService.java</code> · <code>doc/AdmicroYtChannelListManagement.md</code> · table <code>brandsafety_service_youtube_channel</code> (label, label_ttl) · <code>enumerate/ChannelEnum.java</code></div>
+
+    <p><b>Chức năng:</b> quản lý <b>Admicro List</b> — danh sách kênh whitelist/banlist cấp Admicro: gán nhãn + hạn, import thêm kênh. 2 tab Whitelist | Admicro.</p>
+
+    <h3>Luồng nghiệp vụ (theo doc)</h3>
+    <div class="flow">Admin order kênh → team <b>Crawler</b> thu thập → Admin <b>import</b> danh sách → xem Admicro List → <b>gán label</b> cho kênh → kênh <b>hết hạn label</b> → cần review lại.</div>
+
+    <h3>Thành phần → API</h3>
+    <table>
+      <tr><th>UI</th><th>Endpoint / nguồn</th></tr>
+      <tr><td>Bảng danh sách + tab Whitelist/Admicro</td><td>list kênh lọc theo <code>label</code></td></tr>
+      <tr><td>Nút "Import channel"</td><td><code>POST /api/v1/yt/channel/import</code> (Excel url kênh) → insert <code>brandsafety_service_youtube_channel</code></td></tr>
+      <tr><td>Dropdown "Label" (Normal/Banlist…)</td><td><code>POST /api/v1/yt/channel/label</code> → cập nhật <code>label</code> + <code>label_ttl</code></td></tr>
+      <tr><td>Collection count</td><td>số collection đang chứa kênh</td></tr>
+      <tr><td>Categories · Total view</td><td>category YouTube · tổng view</td></tr>
+      <tr><td>Label expiry date (N/a)</td><td><code>label_ttl</code> — hạn của nhãn; hết hạn cần review lại</td></tr>
+    </table>
+
+    <div class="note">
+      <b>Nhãn</b> = <code>ChannelEnum</code>: NORMAL(0) · WHITE(1)=whitelist · ADMICRO(2) · BAN(8)=banlist.<br>
+      <b>Điểm cần check lại:</b> cột <code>label</code> &amp; <code>label_ttl</code> trong schema kênh từng bị đánh <code>[deprecated]</code> (xem #10/schema) nhưng màn này lại đang dùng — có thể đã kích hoạt lại cho Admicro List, xác nhận trước khi sửa.
     </div>
   </div>
 
