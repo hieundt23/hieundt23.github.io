@@ -98,6 +98,18 @@
       <tr><td><code>brandsafety_service_audience</code></td><td>audience_id, title, keywords (TEXT), domains (TEXT), countries, languages, <b>type</b> (0=Tracking/news, 1=Social Media), created_user_id, created_at, last_modified…</td></tr>
     </table>
 
+    <h3>Ý nghĩa các tiêu chí (đây là phần định nghĩa "unsafe")</h3>
+    <p style="font-size:13.5px;margin:2px 0 8px">Audience KHÔNG phải danh sách thông tin suông — mỗi trường là <b>một tiêu chí để đánh giá nội dung/kênh là KHÔNG an toàn</b>. Một kênh/URL bị đánh <b>unsafe</b> (→ không cho quảng cáo chạy) nếu khớp các tiêu chí dưới đây. Chọn các trường này = "vẽ chân dung nội dung mà khách KHÔNG muốn quảng cáo xuất hiện cạnh".</p>
+    <table>
+      <tr><th>Trường</th><th>Chọn nó nghĩa là</th></tr>
+      <tr><td><code>keywords</code></td><td>Nội dung chứa các <b>từ khóa vi phạm</b> này → unsafe. Phải đạt <b>min match</b> (số kw tối thiểu khớp) mới tính — tránh 1 kw lẻ gây chặn oan.</td></tr>
+      <tr><td><code>topics</code></td><td>Nội dung thuộc <b>chủ đề vi phạm</b> (Chính trị, Bạo lực, Người lớn, Cờ bạc…) do ML phân loại → unsafe.</td></tr>
+      <tr><td><code>languages</code></td><td>Kênh dùng <b>ngôn ngữ bị coi là vi phạm</b> → unsafe (vd khách muốn chặn nội dung tiếng Trung thì chọn ngôn ngữ "Trung Quốc").</td></tr>
+      <tr><td><code>countries</code></td><td>Kênh thuộc <b>quốc gia bị coi là vi phạm</b> → unsafe.</td></tr>
+      <tr><td><code>domains</code></td><td><b>Domain bị chặn</b> — chủ yếu cho luồng bs-v1 (bảo vệ quảng cáo trên trang báo/news), ít dùng ở mảng kênh YouTube.</td></tr>
+    </table>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 0">Tóm lại: khách gắn banner với audience nào → nội dung khớp tiêu chí của audience đó sẽ <b>không được hiện quảng cáo</b>. Đây là "luật chặn" của cả hệ thống.</p>
+
     <div class="note">
       <b>Lưu ý / điểm cần check lại:</b><br>
       • Ô Search lọc theo <b>title</b> (titleContains) chứ không theo keyword — xác nhận đây là đúng ý thiết kế hay là bug UX.<br>
